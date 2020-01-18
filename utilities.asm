@@ -389,6 +389,19 @@ RTL
 ;-------------------------------------------------------------------------------- 20/8477
 PrepDynamicTile:
 	PHA : PHX : PHY
+	TAX : LDA RemoteItems : BEQ +
+		TXA
+		CMP !MULTIWORLD_SCOUTREPLY_LOCATION : BNE ++
+			LDA !MULTIWORLD_SCOUTREPLY_PLAYER : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+			LDA !MULTIWORLD_SCOUTREPLY_ITEM
+			TAX
+			BRA +
+		++
+		STA !MULTIWORLD_SCOUT_LOCATION
+		LDA #$00 : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+		LDX #$6B
+	+
+	TXA
 	JSR.w LoadDynamicTileOAMTable
 	JSL.l GetSpriteID ; convert loot id to sprite id
 	JSL.l GetAnimatedSpriteTile_variable
@@ -446,6 +459,8 @@ RTS
 !SKIP_EOR = "$7F5008"
 ;--------------------------------------------------------------------------------
 DrawDynamicTile:
+	JSR PrepDrawRemoteItemSprite
+
 	JSL.l IsNarrowSprite : BCS .narrow
 
 	.full
@@ -475,6 +490,8 @@ DrawDynamicTile:
 RTL
 ;--------------------------------------------------------------------------------
 DrawDynamicTileNoShadow:
+	JSR PrepDrawRemoteItemSprite
+
 	JSL.l IsNarrowSprite : BCS .narrow
 
 	.full
@@ -499,6 +516,31 @@ DrawDynamicTileNoShadow:
 	LDA $90 : !ADD.b #$08 : STA $90
 	LDA $92 : INC #2 : STA $92
 RTL
+;--------------------------------------------------------------------------------
+
+;--------------------------------------------------------------------------------
+PrepDrawRemoteItemSprite:
+	PHA
+	LDA RemoteItems : BEQ +
+		PLA
+		CMP !MULTIWORLD_SCOUTREPLY_LOCATION : BNE ++
+			LDA !MULTIWORLD_SCOUT_LOCATION : BEQ +++
+				LDA !MULTIWORLD_SCOUTREPLY_LOCATION
+				JSL PrepDynamicTile
+				LDA #$00
+				BRA ++
+			+++
+			LDA !MULTIWORLD_SCOUTREPLY_PLAYER : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+			LDA !MULTIWORLD_SCOUTREPLY_ITEM
+			RTS
+		++
+		STA !MULTIWORLD_SCOUT_LOCATION
+		LDA #$00 : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+		LDA #$6B
+		RTS
+	+
+	PLA
+RTS
 ;--------------------------------------------------------------------------------
 
 ;--------------------------------------------------------------------------------
