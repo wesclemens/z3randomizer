@@ -22,7 +22,7 @@ PHX : PHY : PHP
 	LDA <player_id>
 	AND #$00FF
 	DEC
-	CMP #$0040 : !BGE .textdone
+	CMP #$00FF : !BGE .textdone
 	ASL #5
 	TAX
 	-

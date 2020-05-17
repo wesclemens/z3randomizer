@@ -300,6 +300,11 @@ warnpc $339600
 org $328000
 Extra_Text_Table:
 incsrc itemtext.asm
+warnpc $32E000
+
+org $32E000
+incsrc multiworldplayernames.asm
+warnpc $330000
 
 incsrc externalhooks.asm
 ;================================================================================
