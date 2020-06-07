@@ -1,5 +1,16 @@
+;org $32DFD0	; PC 0x195FD0
+;"received from " 28 bytes
+HUD_ReceivedFrom:
+dw $296E, $2961, $295F, $2961, $2965, $2972, $2961, $2960, $007F, $2962, $296E, $296B, $2969, $007F
+
+;org $32DFEC	; PC 0x195FEC
+;"sent to " 16 bytes
+HUD_SentTo:
+dw $296F, $2961, $296A, $2970, $007F, $2970, $296B, $007F
+
+;org $32DFFC	; PC 0x195FFC
 ;--------------------------------------------------------------------------------
-; Player names (32 bytes/player)
+; Player names (32 bytes/player) - 255 players
 ;--------------------------------------------------------------------------------
 PlayerNames:
 ; Player1

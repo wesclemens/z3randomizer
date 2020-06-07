@@ -1,10 +1,4 @@
-;"received from " 28 bytes
-HUD_ReceivedFrom:
-dw $296E, $2961, $295F, $2961, $2965, $2972, $2961, $2960, $007F, $2962, $296E, $296B, $2969, $007F
 
-;"sent to " 16 bytes
-HUD_SentTo:
-dw $296F, $2961, $296A, $2970, $007F, $2970, $296B, $007F
 
 macro Print_Text(hdr, hdr_len, player_id)
 PHX : PHY : PHP
@@ -26,7 +20,7 @@ PHX : PHY : PHP
 	ASL #5
 	TAX
 	-
-	CPY <hdr_len>+#$20 : !BGE ++
+	CPY <hdr_len>+$20 : !BGE ++
 		LDA PlayerNames, X
 		PHX : TYX : STA !MULTIWORLD_HUD_CHARACTER_DATA, X : PLX
 		INX #2 : INY #2

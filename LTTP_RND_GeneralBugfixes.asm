@@ -302,7 +302,7 @@ Extra_Text_Table:
 incsrc itemtext.asm
 warnpc $32E000
 
-org $32E000
+org $32DFD0	; PC 0x195FD0
 incsrc multiworldplayernames.asm
 warnpc $330000
 
