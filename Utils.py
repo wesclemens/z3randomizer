@@ -3,8 +3,12 @@ import subprocess
 import sys
 import typing
 import functools
+import hashlib
 
+from asar import init as asar_init, close as asar_close, patch as asar_patch, geterrors as asar_errors
 from yaml import load, dump
+
+JAP10HASH = '03a63945398191337e896e5771f77173'
 
 try:
     from yaml import CLoader as Loader
@@ -49,14 +53,9 @@ local_path.cached_path = None
 
 
 
-def make_new_base2current(old_rom='../alttp.sfc', new_rom='../working.sfc'):
+def make_new_base2current(old_rom_data, new_rom_data):
     from collections import OrderedDict
     import json
-    import hashlib
-    with open(old_rom, 'rb') as stream:
-        old_rom_data = bytearray(stream.read())
-    with open(new_rom, 'rb') as stream:
-        new_rom_data = bytearray(stream.read())
     # extend to 2 mb
     old_rom_data.extend(bytearray([0x00]) * (2097152 - len(old_rom_data)))
 
@@ -77,5 +76,40 @@ def make_new_base2current(old_rom='../alttp.sfc', new_rom='../working.sfc'):
 
 
 if __name__ == '__main__':
-    print(make_new_base2current())
+    try:
+        asar_init()
+        print("Asar DLL initialized")
+        
+        print("Opening Base rom")
+        with open('../alttp.sfc', 'rb') as stream:
+            old_rom_data = bytearray(stream.read())
+            
+        if len(old_rom_data) % 0x400 == 0x200:
+            old_rom_data = old_rom_data[0x200:]
+            
+        basemd5 = hashlib.md5()
+        basemd5.update(old_rom_data)
+        if JAP10HASH != basemd5.hexdigest():
+            raise Exception("Base rom is not 'Zelda no Densetsu - Kamigami no Triforce (J) (V1.0)'")
+            
+        print("Patching Base Rom")
+        result, new_rom_data = asar_patch('LTTP_RND_GeneralBugfixes.asm', old_rom_data)
+        
+        if result:
+            with open('../working.sfc', 'wb') as stream:
+                stream.write(new_rom_data)
+            print("Success\n")
+            print(make_new_base2current(old_rom_data, new_rom_data))        
+        else:
+            errors = asar_errors()
+            print("\nErrors: " + str(len(errors)))
+            for error in errors:
+                print (error)
+        
+        asar_close()
+    except:
+        import traceback
+        traceback.print_exc()
+    
+    input("Press enter to close")
 
