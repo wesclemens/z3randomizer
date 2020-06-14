@@ -1,12 +1,8 @@
 import os
-import subprocess
 import sys
-import typing
-import functools
 import hashlib
 
 from asar import init as asar_init, close as asar_close, patch as asar_patch, geterrors as asar_errors
-from yaml import load, dump
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
 
@@ -15,7 +11,6 @@ try:
 except ImportError:
     from yaml import Loader
 
-import xml.etree.ElementTree as ET
 
 def int16_as_bytes(value):
     value = value & 0xFFFF
@@ -27,9 +22,9 @@ def int32_as_bytes(value):
     return [value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF]
 
 
-
 def is_bundled():
     return getattr(sys, 'frozen', False)
+
 
 def local_path(path):
     if local_path.cached_path:
@@ -49,8 +44,8 @@ def local_path(path):
 
     return os.path.join(local_path.cached_path, path)
 
-local_path.cached_path = None
 
+local_path.cached_path = None
 
 
 def make_new_base2current(old_rom_data, new_rom_data):
@@ -110,6 +105,4 @@ if __name__ == '__main__':
     except:
         import traceback
         traceback.print_exc()
-    
-    input("Press enter to close")
 
