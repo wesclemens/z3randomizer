@@ -88,7 +88,7 @@ if __name__ == '__main__':
             raise Exception("Base rom is not 'Zelda no Densetsu - Kamigami no Triforce (J) (V1.0)'")
             
         print("Patching Base Rom")
-        result, new_rom_data = asar_patch('LTTP_RND_GeneralBugfixes.asm', old_rom_data)
+        result, new_rom_data = asar_patch(os.path.abspath('LTTP_RND_GeneralBugfixes.asm'), old_rom_data)
         
         if result:
             with open('../working.sfc', 'wb') as stream:
