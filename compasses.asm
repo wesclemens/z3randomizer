@@ -47,6 +47,7 @@ CompassCountDungeonHandlers: ; pointers to functions that handle dungeon-specifi
 }
 
 CompassCount_Escape:
+    print "compass_r_addr: ", pc
 	%DrawConstantNumber(0,8)
 	SEP #$20
 	LDA $7EF434 : LSR #4

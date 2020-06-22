@@ -303,7 +303,7 @@ AddInventory:
 	LDA !MULTIWORLD_RECEIVING_ITEM : CMP #$01 : BNE +
 		BRL .fullItemCounts
 	+
-	
+
 	LDA $1B : BNE + : BRL .fullItemCounts : +
 	; ==BEGIN INDOOR-ONLY SECTION
 
@@ -313,6 +313,7 @@ AddInventory:
 		;!SHAME_CHEST = "$7EF416" ; ---s ----
 		;LDA !SHAME_CHEST : ORA.w #$0010 : STA !SHAME_CHEST
 	;+
+print "compass_w_addr: ", pc
 	SEP #$20 ; Set 8-bit Accumulator
 
 	LDA $040C ; get dungeon id
