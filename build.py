@@ -2,7 +2,7 @@ import os
 import sys
 import hashlib
 
-from asar import init as asar_init, close as asar_close, patch as asar_patch, geterrors as asar_errors
+from asar import init as asar_init, close as asar_close, patch as asar_patch, geterrors as asar_errors, getprints as asar_prints, getwarnings as asar_warnings
 
 JAP10HASH = '03a63945398191337e896e5771f77173'
 
@@ -94,12 +94,19 @@ if __name__ == '__main__':
             with open('../working.sfc', 'wb') as stream:
                 stream.write(new_rom_data)
             print("Success\n")
-            print(make_new_base2current(old_rom_data, new_rom_data))        
+            print(make_new_base2current(old_rom_data, new_rom_data))
+            prints = asar_prints()
+            for p in prints:
+                print(p)
         else:
             errors = asar_errors()
             print("\nErrors: " + str(len(errors)))
             for error in errors:
                 print (error)
+        warnings = asar_warnings()
+        print("\nWarnings: " + str(len(warnings)))
+        for w in warnings:
+            print(w)
         
         asar_close()
     except:
