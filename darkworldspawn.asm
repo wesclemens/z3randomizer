@@ -12,6 +12,7 @@ DoWorldFix:
 		JMP DoWorldFix_Inverted
 	+
 	LDA.l Bugfix_MirrorlessSQToLW : BEQ .skip_mirror_check
+	print "MirrorCheckOverride2: ", pc
 		LDA $7EF353 : BEQ .noMirror ; check if we have the mirror
 	.skip_mirror_check ; alt entrance point
 	LDA $7EF3C5 : CMP.b #$03 : !BLT .aga1Alive ; check if agahnim 1 is alive
@@ -47,6 +48,7 @@ RTL
 ;================================================================================
 DoWorldFix_Inverted:
 	LDA.l Bugfix_MirrorlessSQToLW : BEQ .skip_mirror_check
+	print "MirrorCheckOverride2: ", pc
 		LDA $7EF353 : BEQ .noMirror ; check if we have the mirror
 	.skip_mirror_check ; alt entrance point
 	LDA $7EF3C5 : CMP.b #$03 : !BLT .aga1Alive ; check if agahnim 1 is alive
