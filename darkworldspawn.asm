@@ -12,6 +12,7 @@ DoWorldFix:
 		JMP DoWorldFix_Inverted
 	+
 	LDA.l Bugfix_MirrorlessSQToLW : BEQ .skip_mirror_check
+	.doors_mirror_override
 	print "MirrorCheckOverride2: ", pc
 		LDA $7EF353 : BEQ .noMirror ; check if we have the mirror
 	.skip_mirror_check ; alt entrance point
@@ -48,6 +49,7 @@ RTL
 ;================================================================================
 DoWorldFix_Inverted:
 	LDA.l Bugfix_MirrorlessSQToLW : BEQ .skip_mirror_check
+	.doors_mirror_override
 	print "MirrorCheckOverride2: ", pc
 		LDA $7EF353 : BEQ .noMirror ; check if we have the mirror
 	.skip_mirror_check ; alt entrance point

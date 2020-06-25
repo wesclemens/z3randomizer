@@ -16,6 +16,7 @@ RTL
 ;--------------------------------------------------------------------------------
 OnDrawHud:
 	JSL.l DrawChallengeTimer ; this has to come before NewDrawHud because the timer overwrites the compass counter
+	.DrHudOverride
 	print "DrHudOverride: ", pc
 	JSL.l NewDrawHud
 	JSL.l SwapSpriteIfNecissary
