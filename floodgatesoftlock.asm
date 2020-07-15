@@ -11,15 +11,16 @@ FloodGateReset:
 		LDA $7EF051 : AND.b #$FE : STA $7EF051 ; clear water front room (room 40)
 	+
 FloodGateResetInner:
-	LDA.l Bugfix_SwampWaterLevel : BEQ +++
-		LDA $7EF06F : AND.b #$04 : BEQ + ; Check if key in room 55 has been collected. 
-		LDA $7EF356 : AND.b #$01 : BNE ++ ; Check for flippers. This can otherwise softlock doors if flooded without flippers and no way to reset.
-	+
+	LDA.l Bugfix_SwampWaterLevel : BEQ .done
+	    LDA $279004 : BEQ .check_room_53 ; Only do the check for room 55 if on door rando
+		LDA $7EF06F : AND.b #$04 : BEQ .drain_room_55 ; Check if key in room 55 has been collected. 
+		LDA $7EF356 : AND.b #$01 : BNE .check_room_53 ; Check for flippers. This can otherwise softlock doors if flooded without flippers and no way to reset.
+	.drain_room_55
 		LDA $7EF06E : AND.b #$7F : STA $7EF06E ; clear water room 55 - outer room you shouldn't be able to softlock except in major glitches
-	++
-		LDA $7EF06B : AND.b #$04 : BNE +++ ; Check if key in room 53 has been collected.
+	.check_room_53
+		LDA $7EF06B : AND.b #$04 : BNE .done ; Check if key in room 53 has been collected.
 		; no need to check for flippers on the inner room, as you can't get to the west door no matter what, without flippers.
 		LDA $7EF06A : AND.b #$7F : STA $7EF06A ; clear water room 53 - inner room with the easy key flood softlock
-	+++
+	.done
 RTL
 ;================================================================================
