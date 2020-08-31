@@ -165,6 +165,16 @@ SpritePrep_ShopKeeper:
 			LDA.l ShopContentsTable+2, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
 			LDA.l ShopContentsTable+3, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
 			
+			LDA.l EnableRetroSkipArrow : BEQ ++++
+			LDA.l ShopContentsTable+1, X : CMP #$43 : BNE ++++
+			LDA.l $7EF377 : BEQ ++++
+			LDA.l ShopContentsTable+4, X : BEQ ++++
+				LDA.l ShopContentsTable+5, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
+				LDA.l ShopContentsTable+6, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
+				LDA.l ShopContentsTable+7, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
+				BRA +++
+			++++
+			
 			PHY
 				PHX
 					LDA.b #$00 : XBA : TYA : LSR #2 : !ADD !SHOP_SRAM_INDEX : TAX

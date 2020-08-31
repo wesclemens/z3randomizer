@@ -1828,6 +1828,10 @@ org $30E37D ; PC 0x18637D
 Enable_TerrorPin_AI_Fix:
 db #$01
 
+org $30E37E ; PC 0x18637E
+EnableRetroSkipArrow:
+db #$00 ;$00 = off; (all replacement items require buying the single arrow first.) $01 = on (Buying any single arrow causes the other single arrows to be skipped.)
+
 ;--------------------------------------------------------------------------------
 ; 0x186380 - 187FFF (unused)
 ;--------------------------------------------------------------------------------
