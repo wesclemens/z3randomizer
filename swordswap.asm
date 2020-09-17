@@ -168,6 +168,7 @@ GetSmithSword:
 CheckMedallionSword:
 	PHB : PHX : PHY
 		LDA.l AllowSwordlessMedallionUse : BNE +++ : BRL + : +++
+		    CMP #$02 : BNE +++ : BRL .permit : +++  ; Always allow swordless medallion use.
 			LDA $1B : BEQ .outdoors
 			.indoors
 				REP #$20 ; set 16-bit accumulator
