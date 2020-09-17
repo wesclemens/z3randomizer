@@ -171,22 +171,16 @@ CheckMedallionSword:
 		    CMP #$02 : BNE +++ : BRL .permit : +++  ; Always allow swordless medallion use.
 			LDA $1B : BEQ .outdoors
 			.indoors
-				REP #$20 ; set 16-bit accumulator
-				LDA $A0 ; load room ID
-				CMP.w #$000E : BNE ++ : .freezor1
-					LDA $22 : AND.w #$01FF : CMP.w #368-8 : !BLT .normal : CMP.w #368+32-8 : !BGE .normal ; check x-coord
-					LDA $20 : AND.w #$01FF : CMP.w #400-22 : !BLT .normal : CMP.w #400+32-22 : !BGE .normal ; check y-coord
-					BRL .permit
-				++ : CMP.w #$007E : BNE ++ : .freezor2
-					LDA $22 : AND.w #$01FF : CMP.w #112-8 : !BLT .normal : CMP.w #112+32-8 : !BGE .normal ; check x-coord
-					LDA $20 : AND.w #$01FF : CMP.w #400-22 : !BLT .normal : CMP.w #400+32-22 : !BGE .normal ; check y-coord
-					BRL .permit
-				++ : CMP.w #$00DE : BNE ++ : .kholdstare
-					LDA $22 : AND.w #$01FF : CMP.w #368-8 : !BLT .normal : CMP.w #368+32-8 : !BGE .normal ; check x-coord
-					LDA $20 : AND.w #$01FF : CMP.w #144-22 : !BLT .normal : CMP.w #144+32-22 : !BGE .normal ; check y-coord
-					BRA .permit
-				++ : .normal
-				SEP #$20 ; set 8-bit accumulator
+				LDX #$0F
+				-
+				LDA $0E20, X
+				CMP #$A1 : BEQ .isspriteactive ; Freezor
+				CMP #$A2 : BEQ .isspriteactive ; Kholdstare
+				CMP #$A3 : BNE .nextsprite     ; Kholdstare shell
+				.isspriteactive
+				LDA $0DD0, X : BEQ + : BRL .permit : +
+				.nextsprite
+				DEX : BPL -
 				BRA .done
 			.outdoors
 				LDA $8A : CMP.b #$70 : BNE ++
