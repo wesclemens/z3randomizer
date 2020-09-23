@@ -263,6 +263,7 @@ RTL
 ;--------------------------------------------------------------------------------
 CountChestKey: ; called by neighbor functions
 	PHA : PHX
+		lda !MULTIWORLD_ITEM_PLAYER_ID : bne .end
 		CPY #$24 : BEQ +  ; small key for this dungeon - use $040C
 		CPY #$A0 : !BLT .end ; Ignore most items
 		CPY #$AE : !BGE .end ; Ignore reserved key and generic key
