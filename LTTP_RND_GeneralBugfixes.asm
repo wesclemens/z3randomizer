@@ -16,12 +16,12 @@ db #$30 ; set fast lorom
 ;db #$55 ; enable S-RTC
 
 org $00FFD7 ; <- 7FD7 - Bank00.asm : 9177 (db $0A   ; rom size)
-db #$0B ; mark rom as 16mbit
+db #$0C ; mark rom as 32mbit
 
 org $00FFD8 ; <- 7FD8 - Bank00.asm : 9178 (db $03   ; ram size (sram size))
 db #$05 ; mark sram as 32k
 
-org $3FFFFF ; <- 1FFFFF
+org $FFFFFF ; <- 3FFFFF
 db #$00 ; expand file to 2mb
 
 org $1FFFF8 ; <- FFFF8 timestamp rom
@@ -106,7 +106,7 @@ db #$20, #$19, #$08, #$31 ; year/month/day
 
 incsrc hooks.asm
 incsrc treekid.asm
-incsrc spriteswap.asm
+;incsrc spriteswap.asm
 incsrc hashalphabethooks.asm
 incsrc sharedplayerpalettefix.asm
 
@@ -214,6 +214,7 @@ incsrc toast.asm
 incsrc darkroomitems.asm
 incsrc multiworld.asm
 incsrc terrorpin.asm
+incsrc RandSprite.asm
 warnpc $A58000
 
 ;org $228000 ; contrib area

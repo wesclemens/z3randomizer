@@ -19,7 +19,7 @@ OnDrawHud:
 	.DrHudOverride
 	print "DrHudOverride: ", pc
 	JSL.l NewDrawHud
-	JSL.l SwapSpriteIfNecissary
+	;JSL.l SwapSpriteIfNecissary
 	JSL.l PollService
 JML.l ReturnFromOnDrawHud
 ;--------------------------------------------------------------------------------

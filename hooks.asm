@@ -568,7 +568,7 @@ NOP #3
 ; File Select Init Event
 ;--------------------------------------------------------------------------------
 org $0CCC89 ; <- 0x64C89 Bank0C.asm : 1598 (JSL EnableForceBlank)
-JSL.l OnInitFileSelect
+JSL.l OnInitFileSelectRandSprite
 ;--------------------------------------------------------------------------------
 
 ;================================================================================
@@ -883,9 +883,9 @@ JSL CheckReceivedItemPropertiesBeforeLoad
 org $08C70F ; 4470F - ancilla_receive_item.asm : 582 - (LDA.b #$00 : STA ($92), Y)
 JSL.l LoadNarrowObject
 
-org $0985ED ; 485ED - ancilla_init.asm:693 (LDA $02E9 : CMP.b #$01)
-JSL.l AddReceivedItemExpandedGetItem
-NOP
+;org $0985ED ; 485ED - ancilla_init.asm:693 (LDA $02E9 : CMP.b #$01)
+;JSL.l AddReceivedItemExpandedGetItem
+;NOP
 
 org $07B57D ; 3B57D - Bank07.asm:8527 (LDA Link_ReceiveItemAlternates, Y : STA $03)
 JSL.l Link_ReceiveItemAlternatesExpanded_loadAlternate
@@ -2571,5 +2571,20 @@ CheckIfReading:
 org $1EB2B1 ; sprite_terrorpin.asm(57) : AND.b #$03 : STA $0DE0, X ; 5 bytes
 JSL FixTerrorpin ; 4 bytes
 NOP				 ; 1 byte
+;--------------------------------------------------------------------------------
+
+;================================================================================
+; Random Sprite on Event
+;--------------------------------------------------------------------------------
+org $06F40C
+JSL change_sprite_damage : NOP #$01 ;LDA $0E20, X : CMP.b #$61
+org $02D61A
+JSL change_sprite_enter
+org $02E20A
+JSL change_sprite_exit : NOP #$01
+org $079C90
+JSL change_sprite_slash
+org $0985ED
+JSL change_sprite_item : NOP #$01
 ;--------------------------------------------------------------------------------
 

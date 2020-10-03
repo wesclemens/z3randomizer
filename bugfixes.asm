@@ -162,7 +162,7 @@ REP #$20
 LDA $7EF359 : STA $0C
 LDA $7EF35B : AND.w #$00FF
 JSL LoadGearPalettes_variable
-JSL SpriteSwap_Palette_ArmorAndGloves_part_two
+JSL Palette_ArmorAndGlovesRandSprite_part_two
 RTL
 
 ;--------------------------------------------------------------------------------

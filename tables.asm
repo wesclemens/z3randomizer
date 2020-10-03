@@ -1832,6 +1832,10 @@ org $30E37E ; PC 0x18637E
 EnableRetroSkipArrow:
 db #$00 ;$00 = off; (all replacement items require buying the single arrow first.) $01 = on (Buying any single arrow causes the other single arrows to be skipped.)
 
+org $30E37F ; PC 0x18637F
+RandomSpriteOnEvent:
+db #$00 ;$00 = off, $01 = hit, $02 = enter, $04 = exit, $08 = Sword slash, $10 = get_item
+
 ;--------------------------------------------------------------------------------
 ; 0x186380 - 187FFF (unused)
 ;--------------------------------------------------------------------------------
