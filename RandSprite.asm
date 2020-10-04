@@ -1,31 +1,24 @@
 ;================================================================================
-org $008A01
-LDA $BC
-
-
-org $1BEDF9
-JSL Palette_ArmorAndGlovesRandSprite ;4bytes
-RTL ;1byte 
-NOP #$01
-
-
-org $1BEE1B
-JSL Palette_ArmorAndGlovesRandSprite_part_two
-RTL
-
-
-org $24FF00
-print "Rand Srpite Start: ", pc
-
 macro ChangeSpriteOnEvent(event)
-    LDA RandomSpriteOnEvent : AND <event> : BEQ .continue
+	LDA DisableRandomSpriteOnEvent : BNE .endChangeSpriteOnEvent
+	PHP : REP #$30
+    LDA RandomSpriteOnEvent : AND <event> : BEQ .no_change
+	PLP
 	JSR change_sprite
-	.continue
+	BRA .endChangeSpriteOnEvent	;Burn the 3 cycles for previous branch not taken
+	.no_change
+	NOP	;Burn the 2 cycles for previous branch already taken.
+	PLP
+	JSR dont_change_sprite
+	.endChangeSpriteOnEvent
 endmacro
 
 OnInitFileSelectRandSprite:
 {
-    %ChangeSpriteOnEvent(#$FF)
+	LDA DisableRandomSpriteOnEvent : BNE .continue
+	LDA #$E0 : STA $BC	; Set default sprite.
+    %ChangeSpriteOnEvent(RandomSpriteOnEvent)
+	.continue
     JSL OnInitFileSelect
     RTL
 }
@@ -33,7 +26,7 @@ OnInitFileSelectRandSprite:
 Palette_ArmorAndGlovesRandSprite:
 {
     ;DEDF9
-     LDA RandomSpriteOnEvent : BNE .continue
+     LDA DisableRandomSpriteOnEvent : BEQ .continue
         LDA.b #$10 : STA $BC ; Load Original Sprite Location
         REP #$21
         LDA $7EF35B
@@ -41,7 +34,7 @@ Palette_ArmorAndGlovesRandSprite:
     RTL
     .part_two
     SEP #$30
-    LDA RandomSpriteOnEvent : BNE .continue
+    LDA DisableRandomSpriteOnEvent : BEQ .continue
         REP #$30
         LDA $7EF354
         JSL $1BEE21;Read Original Palette Code
@@ -99,39 +92,46 @@ change_sprite:
 	RTS
 }
 
+dont_change_sprite:
+{
+    JSL GetRandomInt : AND #$1F : !ADD #$E0 : LDA $BC
+	STA $7EC178
+	JSL Palette_ArmorAndGlovesRandSprite
+	STZ $0710
+	RTS
+}
+
 change_sprite_damage:
 {
-	%ChangeSpriteOnEvent(#$01)
+	%ChangeSpriteOnEvent(#$0001)
 	LDA $0E20, X : CMP.b #$61 ; Restored Code Bank06.asm(5967) ; LDA $0E20, X : CMP.b #$61 : BNE .not_beamos_laser
     RTL
 }
 
 change_sprite_enter:
 {
-    %ChangeSpriteOnEvent(#$02)
+    %ChangeSpriteOnEvent(#$0002)
     LDA.b #$01 : STA $1B
     RTL
 }
 
 change_sprite_exit:
 {
-    %ChangeSpriteOnEvent(#$04)
+    %ChangeSpriteOnEvent(#$0004)
     STZ $1B : STZ $0458
     RTL
 }
 
 change_sprite_slash:
 {
-    %ChangeSpriteOnEvent(#$08)
+    %ChangeSpriteOnEvent(#$0008)
     JSL $0DBB67
     RTL
 }
 
 change_sprite_item:
 {
-    %ChangeSpriteOnEvent(#$10)
+    %ChangeSpriteOnEvent(#$0010)
     JSL AddReceivedItemExpandedGetItem
     RTL
 }
-
-print "Rand Srpite End: ", pc

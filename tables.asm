@@ -1834,7 +1834,15 @@ db #$00 ;$00 = off; (all replacement items require buying the single arrow first
 
 org $30E37F ; PC 0x18637F
 RandomSpriteOnEvent:
-db #$00 ;$00 = off, $01 = hit, $02 = enter, $04 = exit, $08 = Sword slash, $10 = get_item
+dw #$0000 ;$00 = off, $01 = hit, $02 = enter, $04 = exit, $08 = Sword slash, $10 = get_item
+
+org $30E381 ; PC 0x186381
+DisableRandomSpriteOnEvent:
+db #$01 ;$01 = on, $00 = off
+
+org $30E382 ; PC 0x186382
+GTBigKeyOf:
+;db 22
 
 ;--------------------------------------------------------------------------------
 ; 0x186380 - 187FFF (unused)
