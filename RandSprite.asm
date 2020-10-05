@@ -135,3 +135,28 @@ change_sprite_item:
     JSL AddReceivedItemExpandedGetItem
     RTL
 }
+
+EndOfRandSprite:
+macro copysprite()
+	!spritescopied #= 0
+	!spritesoffset #= $E08000
+	while !spritescopied < 32
+		org !spritesoffset
+		!copycount #= 0
+		while !copycount+3 < $7000
+			dd read4(pctosnes($80000+!copycount))
+			!copycount #= !copycount+4
+		endif
+		!copycount #= 0
+		while !copycount+3 < $78
+			dd read4(pctosnes($DD308+!copycount))
+			!copycount #= !copycount+4
+		endif
+		dd read4(pctosnes($DEDF5))
+		!spritescopied #= !spritescopied+1
+		!spritesoffset #= !spritesoffset+$10000
+	endif
+endmacro
+%copysprite()
+org EndOfRandSprite
+

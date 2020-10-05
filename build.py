@@ -1,6 +1,10 @@
+import bsdiff4
+import yaml
+import lzma
 import os
 import sys
 import hashlib
+from typing import Optional
 
 from asar import init as asar_init, close as asar_close, patch as asar_patch, geterrors as asar_errors, getprints as asar_prints, getwarnings as asar_warnings
 
@@ -69,6 +73,22 @@ def make_new_base2current(old_rom_data, new_rom_data):
     basemd5.update(new_rom_data)
     return "New Rom Hash: " + basemd5.hexdigest()
 
+    
+def generate_yaml(patch: bytes, metadata: Optional[dict] = None) -> bytes:
+    patch = yaml.dump({"meta": metadata,
+                       "patch": patch,
+                       "game": "alttp",
+                       "base_checksum": JAP10HASH})
+    return patch.encode(encoding="utf-8-sig")
+    
+def generate_patch(baserombytes: bytes, rom: bytes) -> bytes:
+    patch = bsdiff4.diff(bytes(baserombytes), rom)
+    return generate_yaml(patch, {})
+    
+def write_lzma(data: bytes, path: str):
+    with lzma.LZMAFile(path, 'wb') as f:
+        f.write(data)
+
 
 if __name__ == '__main__':
     try:
@@ -98,6 +118,7 @@ if __name__ == '__main__':
             prints = asar_prints()
             for p in prints:
                 print(p)
+            write_lzma(generate_patch(old_rom_data, new_rom_data), "basepatch.bmbp")
         else:
             errors = asar_errors()
             print("\nErrors: " + str(len(errors)))
