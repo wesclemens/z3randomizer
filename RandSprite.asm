@@ -1,5 +1,6 @@
 ;================================================================================
 macro ChangeSpriteOnEvent(event)
+	PHA : PHY : PHX
 	LDA DisableRandomSpriteOnEvent : BNE .endChangeSpriteOnEvent
 	PHP : REP #$30
     LDA RandomSpriteOnEvent : AND <event> : BEQ .no_change
@@ -11,6 +12,7 @@ macro ChangeSpriteOnEvent(event)
 	PLP
 	JSR dont_change_sprite
 	.endChangeSpriteOnEvent
+	PLX : PLY : PLA
 endmacro
 
 OnInitFileSelectRandSprite:
@@ -134,6 +136,13 @@ change_sprite_item:
     %ChangeSpriteOnEvent(#$0010)
     JSL AddReceivedItemExpandedGetItem
     RTL
+}
+
+change_sprite_bonk:
+{
+	%ChangeSpriteOnEvent(#$0020)
+	JSL StatBonkCounter
+	RTL
 }
 
 EndOfRandSprite:

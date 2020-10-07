@@ -2586,6 +2586,8 @@ org $079C90
 JSL change_sprite_slash
 org $0985ED
 JSL change_sprite_item : NOP #$01
+org $079202
+JSL change_sprite_bonk
 
 org $008A01
 LDA $BC
