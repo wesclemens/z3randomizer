@@ -153,6 +153,7 @@ db #$00
 ; #$03 = Require "NumberOfCrystalsRequiredForGanon" Crystals and Aga2
 ; #$04 = Require "NumberOfCrystalsRequiredForGanon" Crystals
 ; #$05 = Require "GoalItemRequirement" Goal Items
+; #$06 = Require Master sword pedestal to be pulled
 ;--------------------------------------------------------------------------------
 org $30803F ; PC 0x18003F
 HammerableGanon:
