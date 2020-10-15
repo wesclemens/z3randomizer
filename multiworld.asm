@@ -237,7 +237,9 @@ Multiworld_MasterSword_GrantToPlayer:
 {
 	PHA : PHP
 	SEP #$20
-	LDA PedestalSword_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
+	LDA PedestalSword_Player : STA !MULTIWORLD_ITEM_PLAYER_ID : BNE + ; If the triforce is for another player, pedestal can stay pulled.
+	LDA $0589B0 : CMP #$6A : BNE + ; If the item is not triforce, the pedestal can stay pulled.
+		LDA $7EF300 : AND #$BF : STA $7EF300 : + ; Otherwise, reset the pedestal so that it can be pulled again.
 	PLP : PLA
 
 	JSL Link_ReceiveItem ; thing we wrote over
