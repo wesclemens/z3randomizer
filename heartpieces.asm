@@ -229,7 +229,7 @@ macro GetPossiblyEncryptedItem(ItemLabel,TableLabel)
 		LDA.w #<ItemLabel>-<TableLabel>
 		JSL RetrieveValueFromEncryptedTable
 
-		PLX : STX $02 : PLX : STX $01
+		PLX : STX $02 : PLX : STX $00
 	PLP : PLX
 	?done:
 endmacro
