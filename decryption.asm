@@ -53,6 +53,7 @@ RTL
 
 !ChestData = "$01E96C"
 !ChestData_Payload = "$1EABC" ; !ChestData+$0150
+!ChestPlayer_Payload = "$30E290"
 
 ;--------------------------------------------------------------------------------
 GetChestData:
@@ -78,6 +79,13 @@ JML.l Dungeon_OpenKeyedObject_nextChest
 		TXA : LSR
 		JSL RetrieveValueFromEncryptedTable
 		STA $0C
+		
+		LDA.w #!ChestPlayer_Payload : STA $00
+		LDA.w #!ChestPlayer_Payload>>16 : STA $02
+		
+		TXA : LSR
+		JSL RetrieveValueFromEncryptedTable
+		STA !MULTIWORLD_ITEM_PLAYER_ID
 
 	PLA : STA $02 : PLA : STA $00
 
