@@ -985,8 +985,13 @@ db $00 ; $00 = BGM enabled (default) $01 = BGM disabled
 org $30821B ; PC 0x18021B
 FastFanfare:
 db $00 ; $00 = Normal fanfare (default) $01 = Fast fanfare
+org $30821C ; PC 0x18021C
+AllowSettingQuickSwap:
+db $01 ; $01 = QuickSwap user configurable $00 = QuickSwap completely disabled
+AllowSettingMenuSpeed:
+db $01 ; $01 = Menu speed user configurable $00 = Menu speed always default.
 ;--------------------------------------------------------------------------------
-; 0x18021C - 0x18021F (unused)
+; 0x18021D - 0x18021F (unused)
 ;================================================================================
 ; $308220 (0x180220) - $30823F (0x18023F)
 ; Plandomizer Author Name (ASCII) - Leave unused chars as 0

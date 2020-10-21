@@ -12,10 +12,7 @@ QuickSwap:
 	LDA.w $0202 : BEQ .done ; Skip everything if we don't have any items
 
 	;TODO add romtype and race rom checks here
-	LDA.l TournamentSeed : BEQ +
-	LDA.l GameType : AND.b #$02 : BNE +	
-		BRA .done
-	+
+	LDA.l AllowSettingQuickSwap : BNE .done
 
 	PHX
 	XBA ; restore the stashed value
