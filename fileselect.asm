@@ -658,6 +658,7 @@ AltBufferTable:
 		LDA.w #!FSTILE_C_TOP : %fs_draw8x16(14,9)
 		LDA.w #!FSTILE_K_TOP : %fs_draw8x16(14,10)
 	+
+	LDA.l IsEncrypted : AND.w #$00FF : CMP.w #$0003 : BNE +
 	PHP : SEP #$30 : PHX : PHY : JSL ValidateKey : PLY : PLX : PLP
 	AND.w #$00FF : BNE +
 		LDA.w #!FSTILE_L_TOP : %fs_draw8x16(14,5)
