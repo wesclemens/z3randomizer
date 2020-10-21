@@ -363,7 +363,7 @@ db #$00 ; $00 = static rng, $01 = no extra blue balls/warps
 ;--------------------------------------------------------------------------------
 org $308087 ; PC 0x180087
 IsEncrypted:
-dw #$0000 ; $0000 = not encrypted, $0001 = encrypted with static key, $0002 = Encrypted w/ passcode entry screen
+dw #$0000 ; $0000 = not encrypted, $0001 = encrypted with static key, $0002 = Encrypted w/ passcode entry screen, $0003 = Encrypted w/ remotely sent key.
 ;--------------------------------------------------------------------------------
 org $308089 ; PC 0x180089
 TurtleRockAutoOpenFix:

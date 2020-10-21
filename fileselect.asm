@@ -658,7 +658,15 @@ AltBufferTable:
 		LDA.w #!FSTILE_C_TOP : %fs_draw8x16(14,9)
 		LDA.w #!FSTILE_K_TOP : %fs_draw8x16(14,10)
 	+
-
+	PHP : SEP #$30 : PHX : PHY : JSL ValidateKey : PLY : PLX : PLP
+	AND.w #$00FF : BNE +
+		LDA.w #!FSTILE_L_TOP : %fs_draw8x16(14,5)
+		LDA.w #!FSTILE_O_TOP : %fs_draw8x16(14,6)
+		LDA.w #!FSTILE_C_TOP : %fs_draw8x16(14,7)
+		LDA.w #!FSTILE_K_TOP : %fs_draw8x16(14,8)
+		LDA.w #!FSTILE_E_TOP : %fs_draw8x16(14,9)
+		LDA.w #!FSTILE_D_TOP : %fs_draw8x16(14,10)
+	+
 	SEP #$20
 
 RTL
@@ -855,10 +863,17 @@ FSCursorDown:
 RTL
 ;--------------------------------------------------------------------------------
 FSSelectFile:
-	LDA.l IsEncrypted : CMP.b #$02 : BNE .normal
+	LDA.l IsEncrypted : CMP.b #$02 : BNE +
 		STZ $012E ; temporarily cancel file screen selection sound
 		PHX : PHY
 			JSL ValidatePassword : BEQ .must_unlock
+		PLY : PLX
+		LDA.b #$2C : STA $012E ;file screen selection sound
+	+
+	LDA.l IsEncrypted : CMP.b #$03 : BNE .normal
+		STZ $012E ; temporarily cancel file screen selection sound
+		PHX : PHY
+			JSL ValidateKey : BEQ .must_wait
 		PLY : PLX
 		LDA.b #$2C : STA $012E ;file screen selection sound
 	.normal
@@ -867,6 +882,10 @@ JML FSSelectFile_continue
 	.must_unlock
 	PLY : PLX
 	LDA #$03 : STA $C8 ;set cursor to unlock
+	LDA.b #$3C : STA $012E ; play error sound
+JML FSSelectFile_return
+	.must_wait
+	PLY : PLX
 	LDA.b #$3C : STA $012E ; play error sound
 JML FSSelectFile_return
 ;--------------------------------------------------------------------------------

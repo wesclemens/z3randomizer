@@ -217,6 +217,49 @@ RTL
 	LDA #$00
 RTL
 
+
+ValidateKey:	;Used for remotely stored encryption keys.
+	PHX : PHY
+	
+	REP #$20 ; 16 bit Accumulator
+	
+	; Set encryption key to key stored in SRAM
+	LDX.b #$0E
+	- : LDA !PASSWORD_SRAM, X : STA.l !keyBase, X : DEX #2 : BPL -
+	
+	LDA.l !PASSWORD_SRAM+$10 : STA.l !CryptoBuffer
+	LDA.l !PASSWORD_SRAM+$12 : STA.l !CryptoBuffer+2
+	LDA.l !PASSWORD_SRAM+$14 : STA.l !CryptoBuffer+4
+	LDA.l !PASSWORD_SRAM+$16 : STA.l !CryptoBuffer+6
+	
+	LDA.w #$0002 : STA $04 ;set block size
+
+	JSL.l XXTEA_Decode
+	
+	SEP #$20 ; 8 bit accumulator
+	
+	PLY : PLX
+	LDA #$01 : STA.l !ValidKeyLoaded	; No option to manually enter the key. It is remotely stored
+										; and will be written by the client when the race starts.
+
+	LDA !CryptoBuffer+0 : CMP #$31 : BNE .incorrect
+	LDA !CryptoBuffer+1 : CMP #$41 : BNE .incorrect
+	LDA !CryptoBuffer+2 : CMP #$59 : BNE .incorrect
+	LDA !CryptoBuffer+3 : CMP #$26 : BNE .incorrect
+	LDA !CryptoBuffer+4 : CMP #$53 : BNE .incorrect
+	LDA !CryptoBuffer+5 : CMP #$58 : BNE .incorrect
+	LDA !CryptoBuffer+6 : CMP #$97 : BNE .incorrect
+	LDA !CryptoBuffer+7 : CMP #$93 : BNE .incorrect
+	
+	;trial decrypt the known plaintext, and verify if result is correct
+
+	.correct
+	LDA #$01
+RTL
+	.incorrect
+	LDA #$00
+RTL
+
 ;--------------------------------------------------------------------------------
 ; Local Helper functions
 ;--------------------------------------------------------------------------------
