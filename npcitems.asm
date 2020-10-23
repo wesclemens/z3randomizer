@@ -117,7 +117,8 @@ ItemSet_MagicBat:
 RTL
 
 ItemSet_OldMan:
-	PHA : LDA OldManItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID : PLA
+	PHA : %GetPossiblyEncryptedPlayerID(OldManItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedItem(OldManItem, HeartPieceIndoorValues) : TAY : PLA
 	JSL.l Link_ReceiveItem ; thing we wrote over
 	PHA : LDA !NPC_FLAGS : ORA.b #$01 : STA !NPC_FLAGS : PLA
 RTL
@@ -128,19 +129,22 @@ ItemSet_ZoraKing:
 RTL
 
 ItemSet_SickKid:
-	PHA : LDA SickKidItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID : PLA
+	PHA : %GetPossiblyEncryptedPlayerID(SickKidItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedItem(SickKidItem, HeartPieceIndoorValues) : TAY : PLA
 	JSL.l Link_ReceiveItem ; thing we wrote over
 	PHA : LDA !NPC_FLAGS : ORA.b #$04 : STA !NPC_FLAGS : PLA
 RTL
 
 ItemSet_TreeKid:
-	PHA : LDA TreeKidItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID : PLA
+	PHA : %GetPossiblyEncryptedPlayerID(TreeKidItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedItem(TreeKidItem, HeartPieceIndoorValues) : TAY : PLA
 	JSL.l Link_ReceiveItem ; thing we wrote over
 	PHA : LDA !NPC_FLAGS : ORA.b #$08 : STA !NPC_FLAGS : PLA
 RTL
 
 ItemSet_Sahasrala:
-	PHA : LDA SahasralaItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID : PLA
+	PHA : %GetPossiblyEncryptedPlayerID(SahasralaItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedItem(SahasralaItem, HeartPieceIndoorValues) : TAY : PLA
 	JSL.l Link_ReceiveItem ; thing we wrote over
 	PHA : LDA !NPC_FLAGS : ORA.b #$10 : STA !NPC_FLAGS : PLA
 RTL
@@ -152,7 +156,7 @@ ItemSet_Catfish:
 RTL
 
 ItemSet_Library:
-	PHA : LDA LibraryItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID : PLA
+	PHA : %GetPossiblyEncryptedPlayerID(LibraryItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID : PLA
 	JSL.l Link_ReceiveItem ; thing we wrote over
 	PHA : LDA !NPC_FLAGS : ORA.b #$80 : STA !NPC_FLAGS : PLA
 RTL
@@ -165,7 +169,7 @@ ItemSet_Mushroom:
 			; if for any reason the item value is 0 reload it, just in case
 			%GetPossiblyEncryptedItem(MushroomItem, SpriteItemValues) : TAY
 		+
-	LDA MushroomItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedPlayerID(MushroomItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
 	PLA
 	;LDY.b #$29
 	STZ $02E9 ; thing we wrote over - the mushroom is an npc for item purposes apparently
@@ -188,12 +192,12 @@ Set300RupeeNPCItem:
 	CMP.w #291 : BNE +
 		%GetPossiblyEncryptedItem(RupeeNPC_MoldormCave, SpriteItemValues)
 		TAY ; load moldorm cave value into Y
-		LDA RupeeNPC_MoldormCave_Player
+		%GetPossiblyEncryptedPlayerID(RupeeNPC_MoldormCave_Player)
 		BRA .done
 	+ CMP.w #286 : BNE +
 		%GetPossiblyEncryptedItem(RupeeNPC_NortheastDarkSwampCave, SpriteItemValues)
 		TAY ; load northeast dark swamp cave value into Y
-		LDA RupeeNPC_NortheastDarkSwampCave_Player
+		%GetPossiblyEncryptedPlayerID(RupeeNPC_NortheastDarkSwampCave_Player)
 		BRA .done
 	+
 	LDA #$0000

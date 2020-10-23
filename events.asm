@@ -63,7 +63,8 @@ OnUncleItemGet:
 		BIT.b #$02 : BEQ + : STA !INFINITE_BOMBS : +
 		BIT.b #$01 : BEQ + : STA !INFINITE_ARROWS : +
 		
-		LDA UncleItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
+		%GetPossiblyEncryptedItem(UncleItem, SpriteItemValues) : TAY
+		%GetPossiblyEncryptedPlayerID(UncleItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
 	PLA
 	JSL Link_ReceiveItem
 

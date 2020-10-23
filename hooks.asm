@@ -756,6 +756,7 @@ NOP #4
 Smithy_DoesntHaveSword:
 org $06B49D ; <- 3349D - sprite_smithy_bros.asm : 485 (.tempered_sword_or_better)
 Smithy_AlreadyGotSword:
+org $06B561 ; <- 33561 - sprite_smithy_bros.asm : 640 (JSL Link_ReceiveItem)
 ;--------------------------------------------------------------------------------
 org $06ED55 ; <- 36D55 - Bank06.asm : 4817
 JSL.l LoadSwordForDamage ; moth gold sword fix
@@ -1285,8 +1286,12 @@ NOP #8
 org $1DFD67 ; <- EFD67 - sprite_diggin_guy.asm : 242
 JSL.l RigDigRNG
 ;--------------------------------------------------------------------------------
+org $01EDA1 ; <- EDA1 - Bank01.asm
+ChestGamePrizeTable:
 org $01EE94 ; <- EE94 - Bank01.asm : 14121
 JSL.l RigChestRNG
+org $01EEBF ; <- EEBF - Bank01.asm : 14148
+JSL.l GetChestGamePrize
 org $01EEF5 ; <- EEF5 - Bank01.asm
 JSL.l FixChestCounterForChestGame
 org $01EEFD ; <- EEFD - Bank01.asm
@@ -2070,6 +2075,10 @@ CMP.b #$20
 ; the quake medallion AND FLIPPERS
 org $1DDF71 ; <- EDF71 - sprite_great_catfish.asm : 47
 JSL.l MarkThrownItem
+org $1DE184 ; <- EE184 - sprite_great_catfish.asm : 430 (LDA.b #$11 : STA $0D90, X)
+JSL.l MakeQuakeMedallion : NOP
+org $1DE1C2 ; <- EE1C2 - sprite_great_catfish.asm : 473 (LDA.b #$1E : STA $0D90, X)
+JSL.l MakeFlippers : NOP
 ;--------------------------------------------------------------------------------
 ;org $05F65D ; <- 2F65D - DONE IN INVENTORY
 ;JSL.l ItemSet_Powder

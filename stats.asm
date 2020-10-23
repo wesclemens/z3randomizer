@@ -280,9 +280,9 @@ RTS
 CountBonkItem: ; called from GetBonkItem in bookofmudora.asm
 	LDA $A0 ; check room ID - only bonk keys in 2 rooms so we're just checking the lower byte
 	CMP #115 : BNE + ; Desert Bonk Key
-		LDA.L BonkKey_Desert : BRA ++
+		%GetPossiblyEncryptedItem(BonkKey_Desert, HeartPieceIndoorValues) : BRA ++
 	+ : CMP #140 : BNE + ; GTower Bonk Key
-		LDA.L BonkKey_GTower : BRA ++
+		%GetPossiblyEncryptedItem(BonkKey_GTower, HeartPieceIndoorValues) : BRA ++
 	+ LDA.B #$24 ; default to small key
 	++
 	CMP #$24 : BNE +

@@ -204,7 +204,10 @@ Multiworld_BottleVendor_GiveBottle:
 {
 	PHA : PHP
 	SEP #$20
-	LDA BottleMerchant_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedItem(BottleMerchant, SpriteItemValues)
+	TAY
+	%GetPossiblyEncryptedPlayerID(BottleMerchant_Player)
+	STA !MULTIWORLD_ITEM_PLAYER_ID
 	PLP : PLA
 
 	JSL Link_ReceiveItem ; thing we wrote over
@@ -215,7 +218,10 @@ Multiworld_MiddleAgedMan_ReactToSecretKeepingResponse:
 {
 	PHA : PHP
 	SEP #$20
-	LDA PurpleChest_Item_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedItem(PurpleChest_Item, SpriteItemValues)
+	TAY
+	%GetPossiblyEncryptedPlayerID(PurpleChest_Item_Player)
+	STA !MULTIWORLD_ITEM_PLAYER_ID
 	PLP : PLA
 
 	JSL Link_ReceiveItem ; thing we wrote over
@@ -226,7 +232,10 @@ Multiworld_Hobo_GrantBottle:
 {
 	PHA : PHP
 	SEP #$20
-	LDA HoboItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedItem(HoboItem, SpriteItemValues)
+	TAY
+	%GetPossiblyEncryptedPlayerID(HoboItem_Player)
+	STA !MULTIWORLD_ITEM_PLAYER_ID
 	PLP : PLA
 
 	JSL Link_ReceiveItem ; thing we wrote over
@@ -237,7 +246,10 @@ Multiworld_MasterSword_GrantToPlayer:
 {
 	PHA : PHP
 	SEP #$20
-	LDA PedestalSword_Player : STA !MULTIWORLD_ITEM_PLAYER_ID : BNE + ; If the triforce is for another player, pedestal can stay pulled.
+	%GetPossiblyEncryptedItem(PedestalSword, SpriteItemValues)
+	TAY
+	%GetPossiblyEncryptedPlayerID(PedestalSword_Player)
+	STA !MULTIWORLD_ITEM_PLAYER_ID : CMP #$00 : BNE + ; If the triforce is for another player, pedestal can stay pulled.
 		LDA $0589B0 : CMP #$6A : BNE + ; If the item is not triforce, the pedestal can stay pulled.
 		LDA InvincibleGanon : CMP #$06 : BNE + ; If the goal is pedestal ganon, then pedestal remains pulled, even though this pull caused a win.
 		LDA $7EF300 : AND #$BF : STA $7EF300 ; Otherwise, reset the pedestal so that it can be pulled again after the full credit roll.

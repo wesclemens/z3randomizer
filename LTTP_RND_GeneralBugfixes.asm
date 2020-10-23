@@ -152,11 +152,7 @@ incsrc entrances.asm
 incsrc accessability.asm
 incsrc heartbeep.asm
 incsrc capacityupgrades.asm
-incsrc timer.asm
-incsrc doorframefixes.asm
-incsrc music.asm
-incsrc roomloading.asm
-incsrc icepalacegraphics.asm
+print "End of Coda Bank $20: ", pc
 warnpc $A18000
 
 org $1C8000 ; text tables for translation
@@ -183,6 +179,11 @@ org $A1FF00 ; static mapping area
 incsrc init.asm
 
 org $A48000 ; code bank - PUT NEW CODE HERE
+incsrc timer.asm
+incsrc doorframefixes.asm
+incsrc music.asm
+incsrc roomloading.asm
+incsrc icepalacegraphics.asm
 incsrc glitched.asm
 incsrc hardmode.asm
 incsrc goalitem.asm
@@ -215,6 +216,7 @@ incsrc darkroomitems.asm
 incsrc multiworld.asm
 incsrc terrorpin.asm
 incsrc RandSprite.asm
+print "End of Coda Bank $24: ", pc
 warnpc $A58000
 
 ;org $228000 ; contrib area
@@ -337,6 +339,7 @@ warnpc $B08000
 ;$31 Graphics Bank
 ;$32 Text Bank
 ;$33 Graphics Bank
+;$36 Enemizer
 ;$37 Don't Use ZSNES Graphics
 ;$38 Don't Use ZSNES Graphics (continued)
 ;$3A reserved for downstream use

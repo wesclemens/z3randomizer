@@ -3,7 +3,7 @@
 ;--------------------------------------------------------------------------------
 !HEART_REDRAW = "$7F5000"
 LoadCatfishItemGFX:
-	LDA.l CatfishItem_Player : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+	%GetPossiblyEncryptedPlayerID(CatfishItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
     LDA.l $1DE185 ; location randomizer writes catfish item to
 	JSL.l PrepDynamicTile
 RTL
@@ -30,15 +30,25 @@ MarkThrownItem:
 
 	.zora
     JSL.l ItemSet_ZoraKing
-	LDA ZoraItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedPlayerID(ZoraItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
 	BRA .done
 
 	.catfish
     JSL.l ItemSet_Catfish
-	LDA CatfishItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedPlayerID(CatfishItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
 
 	.done
 	PLA
 	JSL Link_ReceiveItem ; thing we wrote over
 RTL
+;--------------------------------------------------------------------------------
+MakeQuakeMedallion:
+	%GetPossiblyEncryptedItem(CatfishItem, SpriteItemValues)
+	STA $0D90, X
+	RTL
+;--------------------------------------------------------------------------------
+MakeFlippers:
+	%GetPossiblyEncryptedItem(ZoraItem, SpriteItemValues)
+	STA $0D90, X
+	RTL
 ;--------------------------------------------------------------------------------
