@@ -42,13 +42,23 @@ MarkThrownItem:
 	JSL Link_ReceiveItem ; thing we wrote over
 RTL
 ;--------------------------------------------------------------------------------
-MakeQuakeMedallion:
-	%GetPossiblyEncryptedItem(CatfishItem, SpriteItemValues)
-	STA $0D90, X
-	RTL
+;DecryptQuakeMedallion:
+;	%GetPossiblyEncryptedItem(CatfishItem, SpriteItemValues) : STA $7F5400
+;	LDA.b #$C0 : JSL Sprite_SpawnDynamically ; thing we wrote over
+;RTL
 ;--------------------------------------------------------------------------------
-MakeFlippers:
-	%GetPossiblyEncryptedItem(ZoraItem, SpriteItemValues)
-	STA $0D90, X
-	RTL
+;MakeQuakeMedallion:
+;	LDA $7F5400
+;	STA $0D90, X ; thing we wrote over
+;	RTL
+;--------------------------------------------------------------------------------
+;DecryptFlippers:
+;	%GetPossiblyEncryptedItem(ZoraItem, SpriteItemValues) : STA $7F5400
+;	LDA.b #$C0 : JSL Sprite_SpawnDynamically ; thing we wrote over
+;RTL
+;--------------------------------------------------------------------------------
+;MakeFlippers:
+;	LDA $7F5400
+;	STA $0D90, X ; thing we wrote over
+;	RTL
 ;--------------------------------------------------------------------------------

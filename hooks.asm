@@ -2075,10 +2075,14 @@ CMP.b #$20
 ; the quake medallion AND FLIPPERS
 org $1DDF71 ; <- EDF71 - sprite_great_catfish.asm : 47
 JSL.l MarkThrownItem
-org $1DE184 ; <- EE184 - sprite_great_catfish.asm : 430 (LDA.b #$11 : STA $0D90, X)
-JSL.l MakeQuakeMedallion : NOP
-org $1DE1C2 ; <- EE1C2 - sprite_great_catfish.asm : 473 (LDA.b #$1E : STA $0D90, X)
-JSL.l MakeFlippers : NOP
+;org $1DE174 ; <- EE174 - sprite_great_catfish.asm : 420 (LDA.b #$C0 : JSL Sprite_SpawnDynamically : BMI .spawnFailed)
+;JSL.l DecryptQuakeMedallion
+;org $1DE184 ; <- EE184 - sprite_great_catfish.asm : 430 (LDA.b #$11 : STA $0D90, X)
+;JSL.l MakeQuakeMedallion : NOP
+;org $1DE1B2 ; <- EE1B2 - sprite_great_catfish.asm : 461 (JSL Sprite_SpawnDynamically : BMI .spawnFailed)
+;JSL.l DecryptFlippers
+;org $1DE1C2 ; <- EE1C2 - sprite_great_catfish.asm : 473 (LDA.b #$1E : STA $0D90, X)
+;JSL.l MakeFlippers : NOP
 ;--------------------------------------------------------------------------------
 ;org $05F65D ; <- 2F65D - DONE IN INVENTORY
 ;JSL.l ItemSet_Powder
