@@ -47,8 +47,8 @@ GetChestGamePrize:
 			
 			LDA $00 : PHA : LDA $02 : PHA
 			
-			LDA #ChestGamePrizeTable : STA $00
-			LDA #ChestGamePrizeTable>>16 : STA $02
+			LDA.w #ChestGamePrizeTable : STA $00
+			LDA.w #ChestGamePrizeTable>>16 : STA $02
 			
 			TXA
 			JSL RetrieveValueFromEncryptedTable
