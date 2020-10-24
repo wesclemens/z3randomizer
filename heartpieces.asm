@@ -237,11 +237,11 @@ endmacro
 
 GetEncryptedPlayerID:
 	PHX
-		PHA
+		TAX
 			LDA $00 : PHA : LDA $02 : PHA
 			LDA.w #ItemPlayerTable : STA $00
 			LDA.w #ItemPlayerTable>>16 : STA $02
-		PLA
+		TXA
 		JSL RetrieveValueFromEncryptedTable
 		PLX : STX $02 : PLX : STX $00
 	PLX
