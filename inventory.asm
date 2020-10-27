@@ -962,7 +962,7 @@ RTL
 ;--------------------------------------------------------------------------------
 LoadPowder:
 	JSL.l Sprite_SpawnDynamically ; thing we wrote over
-	LDA.l WitchItem_Player : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+	%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
 	%GetPossiblyEncryptedItem(WitchItem, SpriteItemValues)
 	STA $0DA0, Y ; Store item type
 	JSL.l PrepDynamicTile
@@ -990,7 +990,7 @@ RTL
 DrawPowder:
 	LDA $02DA : BNE .defer ; defer if link is buying a potion
 	LDA.l !REDRAW : BEQ +
-		LDA.l WitchItem_Player : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+		%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
 		LDA $0DA0, X ; Retrieve stored item type
 		JSL.l PrepDynamicTile
 		LDA #$00 : STA.l !REDRAW ; reset redraw flag
@@ -1017,7 +1017,7 @@ LoadMushroom:
 	LDA $5D : CMP #$14 : BEQ .skip ; skip if we're mid-mirror
 
 	LDA #$00 : STA !REDRAW
-	LDA.l MushroomItem_Player : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+	%GetPossiblyEncryptedPlayerID(MushroomItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
 	%GetPossiblyEncryptedItem(MushroomItem, SpriteItemValues)
 	STA $0E80, X ; Store item type
 	JSL.l PrepDynamicTile
@@ -1056,7 +1056,7 @@ CollectPowder:
 		; if for any reason the item value is 0 reload it, just in case
 		%GetPossiblyEncryptedItem(WitchItem, SpriteItemValues) : TAY
 	+
-	PHA : LDA WitchItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID : PLA
+	PHA : %GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID : PLA
     STZ $02E9 ; item from NPC
     JSL.l Link_ReceiveItem
 	;JSL.l FullInventoryExternal

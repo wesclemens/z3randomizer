@@ -17,6 +17,20 @@ HeartPiece_Mire_Warp:
 	db #$17
 HeartPiece_Smith_Pegs:
 	db #$17
+OldManItem:
+	db #$1A ; #$1A = Magic Mirror
+SahasralaItem:
+	db #$4B ; #$4B = Pegasus Boots
+SickKidItem:
+	db #$16 ; #$16 = Bottle
+TreeKidItem:
+	db #$13 ; #$13 = Shovel
+BonkKey_Desert:
+	db #$24 ; #$24 = Small Key (default)
+BonkKey_GTower:
+	db #$24 ; #$24 = Small Key (default)
+StandingKey_Hera:
+	db #$24 ; #$24 = Small Key (default)
 ;--------------------------------------------------------------------------------
 ; 0x180006 - 0x18000F (unused) [encrypted]
 ;--------------------------------------------------------------------------------
@@ -38,6 +52,22 @@ EtherItem:
 	db #$10 ; #$10 = Ether Medallion
 BombosItem:
 	db #$0F ; #$0F = Bombos Medallion
+PedestalSword:
+	db #$01 ; #$01 = Master Sword
+HoboItem:
+	db #$16 ; #$16 = Bottle
+PurpleChest_Item:
+	db #$16 ; #$16 = Bottle
+BottleMerchant:
+	db #$16 ; #$16 = Bottle
+SmithItem:
+	db #$02 ; #$02 = Tempered Sword
+UncleItem:
+	db #$00 ; #$00 = Fighter Sword & Blue Shield
+ZoraItem:
+	db #$1E ; #$1E = Flippers
+CatfishItem:
+	db #$11 ; #$11 = Quake Medallion
 ;--------------------------------------------------------------------------------
 ; 0x180017 - 0x18001F (unused) [encrypted]
 ;--------------------------------------------------------------------------------
@@ -78,22 +108,22 @@ db #$03 ; #$03 = Golden Sword (default)
 PedestalMusicCheck:
 ;org $08C435 ; <- 44435 - ancilla_receive_item.asm : 125
 ;db #$01 ; #$01 = Master Sword (default)
-org $0589B0 ; PC 0x289B0 ; sprite_master_sword.asm : 179
-PedestalSword:
-db #$01 ; #$01 = Master Sword (default)
+;org $0589B0 ; PC 0x289B0 ; sprite_master_sword.asm : 179
+;PedestalSword:
+;db #$01 ; #$01 = Master Sword (default)
 
 org $308029 ; PC 0x180029 - 0x18002A
 SmithItemMode:
 db #$01 ; #$00 = Classic Tempering Process - #$01 = Quick Item Get (default)
-SmithItem:
-db #$02 ; #$02 = Tempered Sword (default)
+;SmithItem:
+;db #$02 ; #$02 = Tempered Sword (default)
 
 ;org $06B48E ; PC 0x3348E ; sprite_smithy_bros.asm : 473
 ;SmithSwordCheck:
 ;db #$03 ; #$03 = Tempered Sword (default) ; THESE VALUES ARE +1
-org $06B55C ; PC 0x3355C ; sprite_smithy_bros.asm : 634
-SmithSword:
-db #$02 ; #$02 = Tempered Sword (default)
+;org $06B55C ; PC 0x3355C ; sprite_smithy_bros.asm : 634
+;SmithSword:
+;db #$02 ; #$02 = Tempered Sword (default)
 
 ;org $05EBD4 ; PC 0x2EBD4 - sprite_zelda.asm:23 - (LDA $7EF359 : CMP.b #$02 : BCS .hasMasterSword) - Zelda Spawnpoint Sword Check
 ;db #$05 ; #$02 = Tempered Sword (default) - #$05 = All Swords
@@ -784,13 +814,7 @@ HeartContainer_Trinexx:
 ;--------------------------------------------------------------------------------
 ; 0x180159 - 0x18015F (unused) [encrypted]
 ;================================================================================
-org $308160 ; PC 0x180160 - 0x180162
-BonkKey_Desert:
-	db #$24 ; #$24 = Small Key (default)
-BonkKey_GTower:
-	db #$24 ; #$24 = Small Key (default)
-StandingKey_Hera:
-	db #$24 ; #$24 = Small Key (default)
+
 ;--------------------------------------------------------------------------------
 ; 0x180163 - 0x180164 (unused)
 ;================================================================================
@@ -1696,7 +1720,7 @@ dw $0000
 ; 0x186140 - 0x18636B Multiworld Item's PlayerID
 ;--------------------------------------------------------------------------------
 org $30E140 ; PC 0x186140 - 0x186337
-ChestData_Player:
+ChestData_Player: ; [Encrypted]
 dl $000000, $000000, $000000, $000000, $000000, $000000, $000000, $000000
 dl $000000, $000000, $000000, $000000, $000000, $000000, $000000, $000000
 dl $000000, $000000, $000000, $000000, $000000, $000000, $000000, $000000
@@ -1718,6 +1742,7 @@ dl $000000, $000000, $000000, $000000, $000000, $000000, $000000, $000000
 dl $000000, $000000, $000000, $000000, $000000, $000000, $000000, $000000
 dl $000000, $000000, $000000, $000000, $000000, $000000, $000000, $000000
 dl $000000, $000000, $000000, $000000, $000000, $000000, $000000, $000000
+ItemPlayerTable: ; [Encrypted]
 MushroomItem_Player: ; 0x186338
 db #$00
 BottleMerchant_Player: ; 0x186339
@@ -1822,13 +1847,13 @@ TreeKidItem_Player: ; 0x18636A
 db #$00
 ChestGameItem_Player: ; 0x18636B
 db #$00
+
+db #$00, #$00, #$00, #$00 ; Unused space
 ;--------------------------------------------------------------------------------
-org $30E36C ; PC 0x18636C
+;--------------------------------------------------------------------------------
+org $30E37C ; PC 0x18636C
 RemoteItems:
 db #$00 ; $00 = off; $01 = on (default: off)
-org $30E36D ; PC 0x18636D
-;BerserkerMulti.world Seed GUID
-db #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00
 
 org $30E37D ; PC 0x18637D
 Enable_TerrorPin_AI_Fix:
@@ -1849,6 +1874,12 @@ db #$01 ;$01 = on, $00 = off
 org $30E382 ; PC 0x186382
 GTBigKeyOf:
 ;db 22
+
+;--------------------------------------------------------------------------------
+;--------------------------------------------------------------------------------
+org $30E400 ; PC 0x186400
+;BerserkerMulti.world Seed GUID
+db #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00
 
 ;--------------------------------------------------------------------------------
 ; 0x186380 - 187FFF (unused)

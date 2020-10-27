@@ -1,0 +1,19 @@
+		BottleMerchant
+		PurpleChest_Item
+		HoboItem
+		PedestalSword
+		SmithItem (Also SmithSword)
+		UncleItem
+		ZoraItem
+		CatfishItem
+		OldManItem
+		SahasralaItem
+		SickKidItem
+		TreeKidItem
+	StandingKey_Hera
+	BonkKey_Desert
+	BonkKey_GTower
+
+
+
+ChestGameItem	;Encrypt 8 bytes at 0x00EDA1 (Chest game item table)

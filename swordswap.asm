@@ -154,8 +154,8 @@ GetSmithSword:
 		BRA .done
 
 	.buy
-		LDA SmithItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
-	    LDA.l SmithItem : TAY
+		%GetPossiblyEncryptedPlayerID(SmithItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
+	    %GetPossiblyEncryptedItem(SmithItem, SpriteItemValues) : TAY
 	    STZ $02E9 ; Item from NPC
 		PHX : JSL Link_ReceiveItem : PLX
 
@@ -164,6 +164,13 @@ GetSmithSword:
 	
 	.done
 		JML.l Smithy_AlreadyGotSword
+		
+ClassicGetSmithSword:
+	%GetPossiblyEncryptedPlayerID(SmithItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedItem(SmithItem, SpriteItemValues) : TAY
+	JSL Link_ReceiveItem	;Instruction we overwrote
+	JSL ItemSet_SmithSword
+RTL
 ;================================================================================
 CheckMedallionSword:
 	PHB : PHX : PHY

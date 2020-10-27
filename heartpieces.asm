@@ -215,6 +215,7 @@ MaybeMarkDigSpotCollected:
 	PLP : PLA
 RTL
 ;--------------------------------------------------------------------------------
+
 macro GetPossiblyEncryptedItem(ItemLabel,TableLabel)
 	LDA IsEncrypted : BNE ?encrypted
 		LDA.l <ItemLabel>
@@ -229,8 +230,33 @@ macro GetPossiblyEncryptedItem(ItemLabel,TableLabel)
 		LDA.w #<ItemLabel>-<TableLabel>
 		JSL RetrieveValueFromEncryptedTable
 
-		PLX : STX $02 : PLX : STX $01
+		PLX : STX $02 : PLX : STX $00
 	PLP : PLX
+	?done:
+endmacro
+
+GetEncryptedPlayerID:
+	PHX
+		TAX
+			LDA $00 : PHA : LDA $02 : PHA
+			LDA.w #ItemPlayerTable : STA $00
+			LDA.w #ItemPlayerTable>>16 : STA $02
+		TXA
+		JSL RetrieveValueFromEncryptedTable
+		PLX : STX $02 : PLX : STX $00
+	PLX
+	RTL
+
+macro GetPossiblyEncryptedPlayerID(PlayerLabel)
+	LDA IsEncrypted : BNE ?encrypted
+		LDA.l <PlayerLabel>
+		BRA ?done
+	?encrypted:
+	PHP : REP #$30 ; set 16-bit accumulator & index registers
+	LDA.w #<PlayerLabel>-ItemPlayerTable
+	JSL GetEncryptedPlayerID
+	AND.w #$00FF
+	PLP
 	?done:
 endmacro
 
@@ -262,7 +288,7 @@ LoadIndoorValue:
 		%GetPossiblyEncryptedItem(HeartPiece_Smith_Pegs, HeartPieceIndoorValues)
 		BRL .done
 	+ CMP.w #135 : BNE +
-		LDA StandingKey_Hera
+		%GetPossiblyEncryptedItem(StandingKey_Hera, HeartPieceIndoorValues)
 		BRL .done
 	+
 	LDA.w #$0017 ; default to a normal hp
@@ -451,60 +477,60 @@ HeartPieceGetPlayer:
 	REP #$20 ; set 16-bit accumulator
 	LDA $A0 ; these are all decimal because i got them that way
 	CMP.w #135 : BNE +
-		LDA StandingKey_Hera_Player
+		%GetPossiblyEncryptedPlayerID(StandingKey_Hera_Player)
 		BRL .done
 	+ CMP.w #200 : BNE +
-		LDA HeartContainer_ArmosKnights_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_ArmosKnights_Player)
 		BRL .done
 	+ CMP.w #51 : BNE +
-		LDA HeartContainer_Lanmolas_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_Lanmolas_Player)
 		BRL .done
 	+ CMP.w #7 : BNE +
-		LDA HeartContainer_Moldorm_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_Moldorm_Player)
 		BRL .done
 	+ CMP.w #90 : BNE +
-		LDA HeartContainer_HelmasaurKing_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_HelmasaurKing_Player)
 		BRL .done
 	+ CMP.w #6 : BNE +
-		LDA HeartContainer_Arrghus_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_Arrghus_Player)
 		BRL .done
 	+ CMP.w #41 : BNE +
-		LDA HeartContainer_Mothula_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_Mothula_Player)
 		BRL .done
 	+ CMP.w #172 : BNE +
-		LDA HeartContainer_Blind_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_Blind_Player)
 		BRL .done
 	+ CMP.w #222 : BNE +
-		LDA HeartContainer_Kholdstare_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_Kholdstare_Player)
 		BRL .done
 	+ CMP.w #144 : BNE +
-		LDA HeartContainer_Vitreous_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_Vitreous_Player)
 		BRL .done
 	+ CMP.w #164 : BNE +
-		LDA HeartContainer_Trinexx_Player
+		%GetPossiblyEncryptedPlayerID(HeartContainer_Trinexx_Player)
 		BRL .done
 	+ CMP.w #225 : BNE +
-		LDA HeartPiece_Forest_Thieves_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Forest_Thieves_Player)
 		BRL .done
 	+ CMP.w #226 : BNE +
-		LDA HeartPiece_Lumberjack_Tree_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Lumberjack_Tree_Player)
 		BRL .done
 	+ CMP.w #234 : BNE +
-		LDA HeartPiece_Spectacle_Cave_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Spectacle_Cave_Player)
 		BRL .done
 	+ CMP.w #283 : BNE +
 		LDA $22 : XBA : AND.w #$0001 ; figure out where link is
 		BNE ++
-			LDA HeartPiece_Circle_Bushes_Player
+			%GetPossiblyEncryptedPlayerID(HeartPiece_Circle_Bushes_Player)
 			BRL .done
 		++
-			LDA HeartPiece_Graveyard_Warp_Player
+			%GetPossiblyEncryptedPlayerID(HeartPiece_Graveyard_Warp_Player)
 			BRL .done
 	+ CMP.w #294 : BNE +
-		LDA HeartPiece_Mire_Warp_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Mire_Warp_Player)
 		BRL .done
 	+ CMP.w #295 : BNE +
-		LDA HeartPiece_Smith_Pegs_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Smith_Pegs_Player)
 		BRL .done
 	LDA.w #$0000
 	BRL .done
@@ -515,47 +541,47 @@ HeartPieceGetPlayer:
 	LDA $8A
 	CMP.w #$03 : BNE +
 		LDA $22 : CMP.w #1890 : !BLT ++
-			LDA HeartPiece_Spectacle_Player
+			%GetPossiblyEncryptedPlayerID(HeartPiece_Spectacle_Player)
 			BRL .done
 		++
-			LDA EtherItem_Player
+			%GetPossiblyEncryptedPlayerID(EtherItem_Player)
 			BRL .done
 	+ CMP.w #$05 : BNE +
-		LDA HeartPiece_Mountain_Warp_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Mountain_Warp_Player)
 		BRL .done
 	+ CMP.w #$28 : BNE +
-		LDA HeartPiece_Maze_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Maze_Player)
 		BRL .done
 	+ CMP.w #$2A : BNE +
-		LDA HauntedGroveItem_Player
+		%GetPossiblyEncryptedPlayerID(HauntedGroveItem_Player)
 		BRL .done
 	+ CMP.w #$30 : BNE +
 		LDA $22 : CMP.w #512 : !BGE ++
-			LDA HeartPiece_Desert_Player
+			%GetPossiblyEncryptedPlayerID(HeartPiece_Desert_Player)
 			BRL .done
 		++
-			LDA BombosItem_Player
+			%GetPossiblyEncryptedPlayerID(BombosItem_Player)
 			BRL .done
 	+ CMP.w #$35 : BNE +
-		LDA HeartPiece_Lake_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Lake_Player)
 		BRL .done
 	+ CMP.w #$3B : BNE +
-		LDA HeartPiece_Swamp_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Swamp_Player)
 		BRL .done
 	+ CMP.w #$42 : BNE +
-		LDA HeartPiece_Cliffside_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Cliffside_Player)
 		BRL .done
 	+ CMP.w #$4A : BNE +
-		LDA HeartPiece_Cliffside_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Cliffside_Player)
 		BRL .done
 	+ CMP.w #$5B : BNE +
-		LDA HeartPiece_Pyramid_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Pyramid_Player)
 		BRL .done
 	+ CMP.w #$68 : BNE +
-		LDA HeartPiece_Digging_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Digging_Player)
 		BRL .done
 	+ CMP.w #$81 : BNE +
-		LDA HeartPiece_Zora_Player
+		%GetPossiblyEncryptedPlayerID(HeartPiece_Zora_Player)
 		BRL .done
 	+
 	LDA.w #$0000

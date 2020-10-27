@@ -2,7 +2,7 @@
 ; Randomize Book of Mudora
 ;--------------------------------------------------------------------------------
 LoadLibraryItemGFX:
-	LDA.l LibraryItem_Player : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+	%GetPossiblyEncryptedPlayerID(LibraryItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
 	%GetPossiblyEncryptedItem(LibraryItem, SpriteItemValues)
 	STA $0E80, X ; Store item type
 	JSL.l PrepDynamicTile
@@ -28,6 +28,10 @@ RTL
 ; Randomize Bonk Keys
 ;--------------------------------------------------------------------------------
 !REDRAW = "$7F5000"
+!BONK_ITEM_ROOM = "$7F5400"
+!BONK_ITEM_PLAYER_ROOM = "$7F5401"
+!BONK_ITEM = "$7F5402"
+!BONK_ITEM_PLAYER = "$7F5403"
 ;--------------------------------------------------------------------------------
 LoadBonkItemGFX:
 	LDA.b #$08 : STA $0F50, X ; thing we wrote over
@@ -70,26 +74,30 @@ RTL
 ;--------------------------------------------------------------------------------
 LoadBonkItem:
 	LDA $A0 ; check room ID - only bonk keys in 2 rooms so we're just checking the lower byte
+	CMP !BONK_ITEM_ROOM : BNE + : LDA !BONK_ITEM : BRA ++
+	+ : STA !BONK_ITEM_ROOM
 	CMP #115 : BNE + ; Desert Bonk Key
-    	LDA.l BonkKey_Desert
+    	%GetPossiblyEncryptedItem(BonkKey_Desert, HeartPieceIndoorValues) : STA !BONK_ITEM
 		BRA ++
 	+ : CMP #140 : BNE + ; GTower Bonk Key
-		LDA.l BonkKey_GTower
+		%GetPossiblyEncryptedItem(BonkKey_GTower, HeartPieceIndoorValues) : STA !BONK_ITEM
 		BRA ++
 	+
-		LDA.b #$24 ; default to small key
+		LDA.b #$24 : STA !BONK_ITEM ; default to small key
 	++
 RTS
 ;--------------------------------------------------------------------------------
 LoadBonkItem_Player:
 	LDA $A0 ; check room ID - only bonk keys in 2 rooms so we're just checking the lower byte
+	CMP !BONK_ITEM_PLAYER_ROOM : BNE + : LDA !BONK_ITEM_PLAYER : BRA ++
+	+ : STA !BONK_ITEM_PLAYER_ROOM
 	CMP #115 : BNE + ; Desert Bonk Key
-		LDA.l BonkKey_Desert_Player
+		%GetPossiblyEncryptedPlayerID(BonkKey_Desert_Player) : STA !BONK_ITEM_PLAYER
 		BRA ++
 	+ : CMP #140 : BNE + ; GTower Bonk Key
-    	LDA.l BonkKey_GTower_Player
+    	%GetPossiblyEncryptedPlayerID(BonkKey_GTower_Player) : STA !BONK_ITEM_PLAYER
 		BRA ++
 	+
-		LDA.b #$00
+		LDA.b #$00 : STA !BONK_ITEM_PLAYER
 	++
 RTS

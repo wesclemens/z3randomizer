@@ -23,7 +23,7 @@ RTL
 	.forceHeart
 	LDA #$33 : STA $C8 ; assure the correct state if player talked to shopkeeper
 	LDA $0403 : AND.b #$40 : BNE .notHeart
-	LDA ChestGameItem_Player : STA !MULTIWORLD_ITEM_PLAYER_ID
+	%GetPossiblyEncryptedPlayerID(ChestGameItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
 	LDA #$07 ; give prize item
 RTL
 	.notHeart
@@ -35,6 +35,28 @@ RTL
 	CMP #$07 : BNE + ; player got prize item AGAIN
 		LDA.b #$00 ; give them money instead
 	+
+RTL
+
+GetChestGamePrize:
+	LDA IsEncrypted : BNE .encrypted
+		LDA.l ChestGamePrizeTable, X
+		BRA .done
+	.encrypted
+		PHP
+			REP #$30 ; 16-bit Acummulator and Index Registers
+			
+			LDA $00 : PHA : LDA $02 : PHA
+			
+			LDA.w #ChestGamePrizeTable : STA $00
+			LDA.w #ChestGamePrizeTable>>16 : STA $02
+			
+			TXA
+			JSL RetrieveValueFromEncryptedTable
+			AND.w #$00FF
+			
+			PLX : STX $02 : PLX : STX $00
+		PLP
+	.done
 RTL
 ;--------------------------------------------------------------------------------
 FixChestCounterForChestGame:
