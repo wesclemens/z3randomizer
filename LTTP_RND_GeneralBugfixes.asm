@@ -22,7 +22,7 @@ org $00FFD8 ; <- 7FD8 - Bank00.asm : 9178 (db $03   ; ram size (sram size))
 db #$05 ; mark sram as 32k
 
 org $FFFFFF ; <- 3FFFFF
-db #$00 ; expand file to 2mb
+db #$00 ; expand file to 4MiB
 
 org $1FFFF8 ; <- FFFF8 timestamp rom
 db #$20, #$19, #$08, #$31 ; year/month/day
