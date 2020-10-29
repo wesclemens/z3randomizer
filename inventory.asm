@@ -375,10 +375,10 @@ print "compass_w_addr: ", pc
 	; == END INDOOR-ONLY SECTION
 	.fullItemCounts
 
-	LDA !MULTIWORLD_ITEM_PLAYER_ID : BNE +
-		CPY.b #$3B : BNE + ; Skip Total Counts for Repeat Silver Arrows
-			LDA $7EF42A : BIT #$20 : BEQ + : BRA .itemCounts
-	+
+	;LDA !MULTIWORLD_ITEM_PLAYER_ID : BNE +
+	;	CPY.b #$3B : BNE + ; Skip Total Counts for Repeat Silver Arrows
+	;		LDA $7EF42A : BIT #$20 : BEQ + : BRA .itemCounts
+	;+
 
 	LDA !MULTIWORLD_RECEIVING_ITEM : CMP #$01 : BEQ ++
 		LDA $7EF355 : BNE + ; Check for Boots
