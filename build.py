@@ -51,28 +51,6 @@ def local_path(path):
 
 local_path.cached_path = None
 
-
-def make_new_base2current(old_rom_data, new_rom_data):
-    from collections import OrderedDict
-    import json
-    # extend to 2 mb
-    old_rom_data.extend(bytearray([0x00]) * (4194304 - len(old_rom_data)))
-
-    out_data = OrderedDict()
-    for idx, old in enumerate(old_rom_data):
-        new = new_rom_data[idx]
-        if old != new:
-            out_data[idx] = [int(new)]
-    for offset in reversed(list(out_data.keys())):
-        if offset - 1 in out_data:
-            out_data[offset-1].extend(out_data.pop(offset))
-    with open('../base2current.json', 'wt') as outfile:
-        json.dump([{key: value} for key, value in out_data.items()], outfile, separators=(",", ":"))
-
-    basemd5 = hashlib.md5()
-    basemd5.update(new_rom_data)
-    return "New Rom Hash: " + basemd5.hexdigest()
-
     
 def generate_yaml(patch: bytes, metadata: Optional[dict] = None) -> bytes:
     patch = yaml.dump({"meta": metadata,
@@ -114,7 +92,9 @@ if __name__ == '__main__':
             with open('../working.sfc', 'wb') as stream:
                 stream.write(new_rom_data)
             print("Success\n")
-            print(make_new_base2current(old_rom_data, new_rom_data))
+            basemd5 = hashlib.md5()
+            basemd5.update(new_rom_data)
+            print("New Rom Hash: " + basemd5.hexdigest())
             prints = asar_prints()
             for p in prints:
                 print(p)
