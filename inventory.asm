@@ -988,17 +988,23 @@ RTL
 !REDRAW = "$7F5000"
 ;--------------------------------------------------------------------------------
 DrawPowder:
-	LDA $02DA : BNE .defer ; defer if link is buying a potion
-	LDA.l !REDRAW : BEQ +
-		%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
-		LDA $0DA0, X ; Retrieve stored item type
-		JSL.l PrepDynamicTile
-		LDA #$00 : STA.l !REDRAW ; reset redraw flag
-		BRA .defer
-	+
-	LDA $0DA0, X ; Retrieve stored item type
-	JSL.l DrawDynamicTile
-	.defer
+;	LDA $02DA : BNE .defer ; defer if link is buying a potion
+;	LDA.l !REDRAW : BEQ +
+;		%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+;		LDA $0DA0, X ; Retrieve stored item type
+;		JSL.l PrepDynamicTile
+;		LDA #$00 : STA.l !REDRAW ; reset redraw flag
+;		BRA .defer
+;	+
+;	LDA $0DA0, X ; Retrieve stored item type
+;	JSL.l DrawDynamicTile
+;	.defer
+;    LDA.b #$01 : STA $06
+;                 STZ $07
+;    LDA.b #$6B : STA $08
+;    LDA.b #$F6 : STA $09
+;
+	JSL Sprite_DrawMultiple_player_deferred
 RTL
 ;--------------------------------------------------------------------------------
 

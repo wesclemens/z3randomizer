@@ -1634,10 +1634,10 @@ db $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
 org $30C900 ; PC 0x184900 - 0x184FFF - max 224 entries
 ShopContentsTable:
-;db [id][item][price-low][price-high][max][repl_id][repl_price-low][repl_price-high]
-db $01, $51, $64, $00, $07, $FF, $00, $00
-db $01, $53, $64, $00, $07, $FF, $00, $00
-db $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+;db [id][item][price-low][price-high][max][repl_id][repl_price-low][repl_price-high][player]
+db $01, $51, $64, $00, $07, $FF, $00, $00, $00
+db $01, $53, $64, $00, $07, $FF, $00, $00, $00 
+db $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00 
 
 ; Fix spawning with more hearts than capacity when less than 3 heart containers
 LowHeartFix:

@@ -1146,10 +1146,21 @@ NOP #2
 org $05F55F ; <- 2F55F - sprite_potion_shop.asm : 59
 JSL.l LoadPowder
 ;--------------------------------------------------------------------------------
-org $05F681 ; <- 2F681 - sprite_potion_shop.asm : 234
-JSL.l DrawPowder
-RTS
-NOP #8
+org $05F66B ; <- 2F681 - sprite_potion_shop.asm : 234
+.oam_groups:
+    dw 0, 0 : db $24, $15, $00, $12
+    dw 0, 0 : db $24, $15, $00, $03
+;--------------------------------------------------------------------------------
+org $05F67B ; <- 2F681 - sprite_potion_shop.asm : 234
+    ; ; Interesting thing to note: This will end up drawing the same sprite
+    ; ; twice (in the same location), for whatever reason.
+    LDA.b #$02 : STA $06
+                 STZ $07
+    LDA.b #$6B : STA $08
+    LDA.b #$F6 : STA $09
+
+    JSL DrawPowder
+    RTS
 ;--------------------------------------------------------------------------------
 org $05F65D ; <- 2F65D - sprite_potion_shop.asm : 198
 JSL.l CollectPowder
@@ -1164,6 +1175,26 @@ JSL.l DrawMushroom
 ;--------------------------------------------------------------------------------
 org $05EE97 ; <- 2EE97 - sprite_mushroom.asm : 81
 NOP #14
+;--------------------------------------------------------------------------------
+org $05F529 ; <- 2F52C - sprite_potion_shop.asm
+JSL SpritePrep_ShopKeeper
+LDX #$0
+JSR $F539 ; <- powder spawn here
+RTS
+;--------------------------------------------------------------------------------
+org $05F568 ; <- 2F568 - sprite_potion_shop.asm
+LDA #$b0 : STA $0D00, Y : LDA #$90 : STA $0D10, Y ; manually set position of powder item.  does not fix the problem
+LDA #$21 : STA $0D20, Y : LDA #$12 : STA $0D30, Y 
+JMP $F61D
+;--------------------------------------------------------------------------------
+org $05F633 ; <- 2F633 - sprite_potion_shop.asm
+LDA $0E80, X : BNE +
+JSL Sprite_ShopKeeperPotion ;; TODO: i don't remember prices being set on top of the player 
+JSR $F893 ; <- witch behavior here
+RTS
++
+JSR $F644 ; <- powder behavior here 
+RTS
 ;--------------------------------------------------------------------------------
 org $05EB1D ; <- 2EB1D - sprite_bottle_vendor.asm : 158
 JSL.l Multiworld_BottleVendor_GiveBottle

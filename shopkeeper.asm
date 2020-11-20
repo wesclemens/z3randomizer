@@ -57,6 +57,8 @@ macro DrawDigit(value,offset)
 	+
 	LDA $0E : STA !BIGRAM, X : INX : INX
 	LDA.w #56 : STA !BIGRAM, X : INX : INX
+	LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFCA : STA !BIGRAM-2, X : + ;; should just make this INC then ASL.  Also consider using shop id
+	;LDA.w #$ffca : STA !BIGRAM, X : INX : INX
 	LDY $0A : TYA : ASL : TAY : LDA.w .digit_properties, Y : STA !BIGRAM, X : INX : INX
 	LDA.w #$0000 : STA !BIGRAM, X : INX : INX
 	
@@ -86,7 +88,7 @@ DrawPrice:
 			
 			.len1
 				%DrawDigit(#1,#0)
-				
+
 		SEP #$20 ; set 8-bit accumulator
 		TXA : LSR #3 : STA $06 ; request 1-4 OAM slots
 		ASL #2
@@ -113,6 +115,8 @@ RTS
 !SHOP_SRAM_INDEX = "$7F5062"
 !SHOP_MERCHANT = "$7F5063"
 !SHOP_DMA_TIMER = "$7F5064"
+!SHOP_INVENTORY_PLAYER = "$7F5065"
+!SHOP_KEEP_REFILL = "$7F5066"
 ;--------------------------------------------------------------------------------
 !NMI_AUX = "$7F5044"
 ;--------------------------------------------------------------------------------
@@ -126,7 +130,6 @@ SpritePrep_ShopKeeper:
 	PHX : PHY : PHP
 	
 	REP #$30 ; set 16-bit accumulator & index registers
-	;LDA $A0
 	LDX.w #$0000
 	-
 		LDA ShopTable+1, X : CMP $A0 : BNE +
@@ -143,7 +146,7 @@ SpritePrep_ShopKeeper:
 			BRA .success
 		+
 		LDA ShopTable, X : AND.w #$00FF : CMP.w #$00FF : BEQ .fail
-		INX #8
+		INX #8 ;; width of shop table
 	BRA -
 	
 	.fail
@@ -164,7 +167,7 @@ SpritePrep_ShopKeeper:
 			LDA.l ShopContentsTable+1, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
 			LDA.l ShopContentsTable+2, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
 			LDA.l ShopContentsTable+3, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
-			
+			LDA.l ShopContentsTable+8, X : PHX : TYX : STA.l !SHOP_INVENTORY_PLAYER, X : PLX
 			LDA.l EnableRetroSkipArrow : BEQ ++++
 			LDA.l ShopContentsTable+1, X : CMP #$43 : BNE ++++
 			LDA.l $7EF377 : BEQ ++++
@@ -197,10 +200,10 @@ SpritePrep_ShopKeeper:
 				LDA 1,s : TAX : LDA.l .tile_offsets, X : TAX
 				JSR LoadTile
 			PLY : PLX
-			INY #4
+			INY #4 ; width of shop inventory item
 		
 		.next
-		INX #8
+		INX #9 ; width of shop contents table
 	BRL -
 	.stop
 	
@@ -373,6 +376,12 @@ Shopkepeer_CallOriginal:
 ;!SHOP_TYPE = "$7F5051"
 ;!SHOP_CAPACITY = "$7F5020"
 ;!SCRATCH_TEMP_X = "$7F5021"
+Sprite_ShopKeeperPotion:
+	PHB : PHK : PLB
+		JSR.w Shopkeeper_SetupHitboxes
+		JSR.w Shopkeeper_DrawItems
+	PLB
+RTL
 Sprite_ShopKeeper:
 	
 	LDA.l !SHOP_TYPE : CMP.b #$FF : BNE + : JMP.w Shopkepeer_CallOriginal : +
@@ -524,7 +533,7 @@ RTS
 Shopkeeper_BuyItem:
 	PHX : PHY
 		TYX
-		
+
 		LDA.l !SHOP_INVENTORY, X
 		CMP.b #$0E : BEQ .refill ; Bee Refill
 		CMP.b #$2E : BEQ .refill ; Red Potion Refill
@@ -533,6 +542,7 @@ Shopkeeper_BuyItem:
 		BRA +
 			.refill
 			JSL.l Sprite_GetEmptyBottleIndex : BMI .full_bottles
+			; LDA #$1 : STA !SHOP_KEEP_REFILL
 		+
 
 		LDA !SHOP_TYPE : AND.b #$80 : BNE .buy ; don't charge if this is a take-any
@@ -544,26 +554,31 @@ Shopkeeper_BuyItem:
 	        JSL.l Sprite_ShowMessageUnconditional
 			LDA.b #$3C : STA $012E ; error sound
 			BRL .done
-		.full_bottles
-	        LDA.b #$6B
-	        LDY.b #$01
-	        JSL.l Sprite_ShowMessageUnconditional
-			LDA.b #$3C : STA $012E ; error sound
-			BRL .done
+			.full_bottles
+				LDA.b #$6B
+				LDY.b #$01
+				JSL.l Sprite_ShowMessageUnconditional
+				LDA.b #$3C : STA $012E ; error sound
+				BRL .done
 		.buy
 			LDA !SHOP_TYPE : AND.b #$80 : BNE ++ ; don't charge if this is a take-any
 				REP #$20 : LDA $7EF360 : !SUB !SHOP_INVENTORY+1, X : STA $7EF360 : SEP #$20 ; Take price away
 			++
+		.buy_real
+			LDA.l !SHOP_INVENTORY_PLAYER, X : STA !MULTIWORLD_ITEM_PLAYER_ID
 			LDA.l !SHOP_INVENTORY, X : TAY : JSL.l Link_ReceiveItem
 			LDA.l !SHOP_INVENTORY+3, X : INC : STA.l !SHOP_INVENTORY+3, X
 			
 			TXA : LSR #2 : TAX
 			LDA !SHOP_TYPE : BIT.b #$80 : BNE +
+				; LDA !SHOP_KEEP_REFILL : BNE +++
 				LDA.l !SHOP_STATE : ORA.w Shopkeeper_ItemMasks, X : STA.l !SHOP_STATE
+				; +++
 				PHX
 					TXA : !ADD !SHOP_SRAM_INDEX : TAX
 					LDA !SHOP_PURCHASE_COUNTS, X : INC : BEQ +++ : STA !SHOP_PURCHASE_COUNTS, X : +++
 				PLX
+				; LDA #$0 : STA !SHOP_KEEP_REFILL
 				BRA ++
 			+ ; Take-any
 			;STA $FFFFFF
@@ -600,6 +615,7 @@ Setup_ShopItemCollisionHitbox:
 	REP #$20 ; set 16-bit accumulator
 	PHA : PHY
 		LDA !SHOP_TYPE : AND.w #$0003 : DEC : ASL : TAY
+		LDA $A0 : CMP.l #$109 : BNE + : INY #6 : + 
 		LDA.w Shopkeeper_DrawNextItem_item_offsets_idx, Y : STA $00 ; get table from the table table
 	PLY : PLA
     
@@ -710,6 +726,7 @@ Shopkeeper_DrawNextItem:
 	
 	LDA !SHOP_TYPE : AND.b #$03 : DEC : ASL : TAY
 	REP #$20 ; set 16-bit accumulator
+	LDA $A0 : CMP.l #$109 : BNE + : INY #6 : +
 	LDA.w .item_offsets_idx, Y : STA $00 ; get table from the table table
 	LDA 1,s : ASL #2 : TAY ; set Y to the item index
 	LDA ($00), Y : STA.l !SPRITE_OAM ; load X-coordinate
@@ -769,10 +786,14 @@ Shopkeeper_DrawNextItem:
 	INX #4
 RTS
 ;--------------------------------------------------------------------------------
-.item_offsets_idx
+.item_offsets_idx ; 112 60
 dw #.item_offsets_1
 dw #.item_offsets_2
 dw #.item_offsets_3
+.item_offsets_idx_Potion ; 160 176 - (112 64) = (48 112)
+dw #.item_offsets_1p
+dw #.item_offsets_2p
+dw #.item_offsets_3p
 .item_offsets_1
 dw 8, 40
 .item_offsets_2
@@ -782,6 +803,15 @@ dw 32, 40
 dw -40, 40
 dw 8, 40
 dw 56, 40
+.item_offsets_1p
+dw -40, -72
+.item_offsets_2p
+dw -64, -72
+dw -16, -72
+.item_offsets_3p
+dw -88, -72
+dw -40, -72
+dw 8, -72
 .tile_indices
 db $C6, $C8, $CA
 ;--------------------------------------------------------------------------------
@@ -794,6 +824,7 @@ Shopkeeper_DrawNextPrice:
 	REP #$20 ; set 16-bit accumulator
 	PHY
 		LDA !SHOP_TYPE : AND.w #$0003 : DEC : ASL : TAY
+		LDA $A0 : CMP.l #$109 : BNE + : INY #6 : + 
 		LDA.w Shopkeeper_DrawNextItem_item_offsets_idx, Y : STA $00 ; get table from the table table
 		LDA.w .price_columns_idx, Y : STA $02 ; get table from the table table
 	PLY : PHY
