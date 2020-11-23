@@ -1146,14 +1146,9 @@ NOP #2
 org $05F55F ; <- 2F55F - sprite_potion_shop.asm : 59
 JSL.l LoadPowder
 ;--------------------------------------------------------------------------------
-org $05F66B ; <- 2F681 - sprite_potion_shop.asm : 234
-.oam_groups:
-    dw 0, 0 : db $24, $15, $00, $12
-    dw 0, 0 : db $24, $15, $00, $03
-;--------------------------------------------------------------------------------
-org $05F67B ; <- 2F681 - sprite_potion_shop.asm : 234
-    JSL DrawPowder
-    RTS
+org $05F67B ; <- 2F67B - sprite_potion_shop.asm : 234
+JSL DrawPowder
+RTS
 ;--------------------------------------------------------------------------------
 org $05F65D ; <- 2F65D - sprite_potion_shop.asm : 198
 JSL.l CollectPowder
