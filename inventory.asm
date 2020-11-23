@@ -992,7 +992,8 @@ RTL
 ;--------------------------------------------------------------------------------
 !REDRAW = "$7F5000"
 ;--------------------------------------------------------------------------------
-DrawPowder:
+DrawPowder: 
+;	this fights with the shopkeep code, so had to move the powder draw there
 ;	LDA $02DA : BNE .defer ; defer if link is buying a potion
 ;	LDA.l !REDRAW : BEQ +
 ;		%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID

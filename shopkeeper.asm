@@ -715,6 +715,7 @@ Shopkeeper_DrawItems:
 	+ CMP.b #$01 : BNE + : ++
 		JSR.w Shopkeeper_DrawNextItem
 	+
+	LDA $A0 : CMP.l #$109 : BNE +
 	LDA !NPC_FLAGS_2 : AND.b #$20 : BNE +
 		LDX.b #$0C : LDY.b #$03 : JSR.w Shopkeeper_DrawNextItem
 	+
