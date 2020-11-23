@@ -109,14 +109,14 @@ RTS
 !SHOP_ID = "$7F5050"
 !SHOP_TYPE = "$7F5051"
 !SHOP_INVENTORY = "$7F5052" ; $7F505E
-!SHOP_STATE = "$7F505F"
-!SHOP_CAPACITY = "$7F5060"
-!SCRATCH_TEMP_X = "$7F5061"
-!SHOP_SRAM_INDEX = "$7F5062"
-!SHOP_MERCHANT = "$7F5063"
-!SHOP_DMA_TIMER = "$7F5064"
-!SHOP_INVENTORY_PLAYER = "$7F5065"
-!SHOP_KEEP_REFILL = "$7F5066"
+!SHOP_STATE = "$7F5068"
+!SHOP_CAPACITY = "$7F5069"
+!SCRATCH_TEMP_X = "$7F506A"
+!SHOP_SRAM_INDEX = "$7F506B"
+!SHOP_MERCHANT = "$7F506C"
+!SHOP_DMA_TIMER = "$7F506D"
+!SHOP_KEEP_REFILL = "$7F506E"
+!SHOP_INVENTORY_PLAYER = "$7F506F"
 ;--------------------------------------------------------------------------------
 !NMI_AUX = "$7F5044"
 ;--------------------------------------------------------------------------------
@@ -518,6 +518,7 @@ Shopkeeper_SetupHitboxes:
 
 		JSR.w Setup_ShopItemInteractionHitbox
 		JSL.l Utility_CheckIfHitBoxesOverlapLong : BCC .no_interaction
+			LDA $02DA : BNE .no_interaction ; defer if link is buying a potion (this is faster than the potion buying speed before potion shop shuffle)
 		    LDA $F6 : AND.b #$80 : BEQ .no_interaction ; check for A-press
 			LDA $10 : CMP.b #$0C : !BGE .no_interaction ; don't interact in other modes besides game action
 			JSR.w Shopkeeper_BuyItem
@@ -542,7 +543,7 @@ Shopkeeper_BuyItem:
 		BRA +
 			.refill
 			JSL.l Sprite_GetEmptyBottleIndex : BMI .full_bottles
-			; LDA #$1 : STA !SHOP_KEEP_REFILL
+			LDA #$1 : STA !SHOP_KEEP_REFILL
 		+
 
 		LDA !SHOP_TYPE : AND.b #$80 : BNE .buy ; don't charge if this is a take-any
@@ -571,9 +572,9 @@ Shopkeeper_BuyItem:
 			
 			TXA : LSR #2 : TAX
 			LDA !SHOP_TYPE : BIT.b #$80 : BNE +
-				; LDA !SHOP_KEEP_REFILL : BNE +++
+				LDA !SHOP_KEEP_REFILL : BNE +++
 				LDA.l !SHOP_STATE : ORA.w Shopkeeper_ItemMasks, X : STA.l !SHOP_STATE
-				; +++
+				+++
 				PHX
 					TXA : !ADD !SHOP_SRAM_INDEX : TAX
 					LDA !SHOP_PURCHASE_COUNTS, X : INC : BEQ +++ : STA !SHOP_PURCHASE_COUNTS, X : +++
@@ -595,7 +596,7 @@ Shopkeeper_BuyItem:
 	PLY : PLX
 RTS
 Shopkeeper_ItemMasks:
-db #$01, #$02, #$04
+db #$01, #$02, #$04, #$08
 ;--------------------
 ;!SHOP_ID = "$7F5050"
 ;!SHOP_SRAM_INDEX = "$7F5062"
@@ -707,12 +708,15 @@ Shopkeeper_DrawItems:
 	LDX.b #$00
 	LDY.b #$00
 	LDA !SHOP_TYPE : AND.b #$03
-	CMP.b #$03 : BNE +
+	+ CMP.b #$03 : BNE +
 		JSR.w Shopkeeper_DrawNextItem : BRA ++
 	+ CMP.b #$02 : BNE + : ++
 		JSR.w Shopkeeper_DrawNextItem : BRA ++
 	+ CMP.b #$01 : BNE + : ++
 		JSR.w Shopkeeper_DrawNextItem
+	+
+	LDA !NPC_FLAGS_2 : AND.b #$20 : BNE +
+		LDX.b #$0C : LDY.b #$03 : JSR.w Shopkeeper_DrawNextItem
 	+
 	PLY : PLX
 	PLB
@@ -755,10 +759,18 @@ Shopkeeper_DrawNextItem:
 	+
 	XBA
 
+	AND #$FE
+
 	STA.l !SPRITE_OAM+4
 
 	LDA.l !SHOP_INVENTORY, X ; get item palette
 	JSL.l GetSpritePalette : STA.l !SPRITE_OAM+5
+
+	LDA.w .tile_indices, Y : AND.b #$01 : BEQ +; get item palette
+		LDA.l !SPRITE_OAM+5
+		ORA.b #$1
+		STA.l !SPRITE_OAM+5
+	+
 
 	LDA.b #$00 : STA.l !SPRITE_OAM+6
 
@@ -812,8 +824,10 @@ dw -16, -72
 dw -88, -72
 dw -40, -72
 dw 8, -72
+.potion_offset
+dw -16, 0
 .tile_indices
-db $C6, $C8, $CA
+db $C6, $C8, $CA, $25 ; last bit is for sheet change
 ;--------------------------------------------------------------------------------
 !COLUMN_LOW = "$7F5022"
 !COLUMN_HIGH = "$7F5023"
@@ -863,7 +877,7 @@ db #$00, #$FF
 .price_columns_2
 db #$00, #$80, #$80, $FF
 .price_columns_3
-db #$00, #$60, #$60, #$90, #$90, $FF
+db #$00, #$60, #$60, #$90, #$90, $FF, $FF, $FF
 ;--------------------------------------------------------------------------------
 RequestItemOAM:
 	PHX : PHY : PHA

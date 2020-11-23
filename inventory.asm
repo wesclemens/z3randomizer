@@ -966,6 +966,11 @@ LoadPowder:
 	%GetPossiblyEncryptedItem(WitchItem, SpriteItemValues)
 	STA $0DA0, Y ; Store item type
 	JSL.l PrepDynamicTile
+	STA $7F505E
+	LDA #$00
+	STA $7F505F
+	STA $7F5060
+	STA $7F5061
 RTL
 ;--------------------------------------------------------------------------------
 
@@ -999,12 +1004,6 @@ DrawPowder:
 ;	LDA $0DA0, X ; Retrieve stored item type
 ;	JSL.l DrawDynamicTile
 ;	.defer
-;    LDA.b #$01 : STA $06
-;                 STZ $07
-;    LDA.b #$6B : STA $08
-;    LDA.b #$F6 : STA $09
-;
-	JSL Sprite_DrawMultiple_player_deferred
 RTL
 ;--------------------------------------------------------------------------------
 

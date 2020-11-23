@@ -1152,13 +1152,6 @@ org $05F66B ; <- 2F681 - sprite_potion_shop.asm : 234
     dw 0, 0 : db $24, $15, $00, $03
 ;--------------------------------------------------------------------------------
 org $05F67B ; <- 2F681 - sprite_potion_shop.asm : 234
-    ; ; Interesting thing to note: This will end up drawing the same sprite
-    ; ; twice (in the same location), for whatever reason.
-    LDA.b #$02 : STA $06
-                 STZ $07
-    LDA.b #$6B : STA $08
-    LDA.b #$F6 : STA $09
-
     JSL DrawPowder
     RTS
 ;--------------------------------------------------------------------------------
