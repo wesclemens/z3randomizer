@@ -174,8 +174,8 @@ RTL
 ;================================================================================
 CheckMedallionSword:
 	PHB : PHX : PHY
-		LDA.l AllowSwordlessMedallionUse : BNE +++ : BRL + : +++
-		    CMP #$02 : BNE +++ : BRL .permit : +++  ; Always allow swordless medallion use.
+		LDA.l AllowSwordlessMedallionUse : BNE + : BRL .done : +
+		    CMP #$02 : BNE + : BRL .permit : +  ; Always allow swordless medallion use.
 			LDA $1B : BEQ .outdoors
 			.indoors
 				LDX #$0F
@@ -185,25 +185,25 @@ CheckMedallionSword:
 				CMP #$A2 : BEQ .isspriteactive ; Kholdstare
 				CMP #$A3 : BNE .nextsprite     ; Kholdstare shell
 				.isspriteactive
-				LDA $0DD0, X : BEQ + : BRL .permit : +
+				LDA $0DD0, X : BEQ + : BRL .permit : + ;zero = dead, non-zero = alive.
 				.nextsprite
 				DEX : BPL -
 				BRA .done
 			.outdoors
-				LDA $8A : CMP.b #$70 : BNE ++
-					LDA.l MireRequiredMedallion : TAX : LDA.l .medallion_type, X : CMP $0303 : BNE +
-					LDA $7EF2F0 : AND.b #$20 : BNE +
+				LDA $8A
+				CMP.b #$70 : BNE .trock
+					LDA.l MireRequiredMedallion : TAX : LDA.l .medallion_type, X : CMP $0303 : BNE .done
+					LDA $7EF2F0 : AND.b #$20 : BNE .done
 					LDA.b #$08 : PHA : PLB ; set data bank to $08
 					LDY.b #$02 : JSL.l Ancilla_CheckIfEntranceTriggered : BCS .permit ; misery mire
-					BRA +
-				++ : CMP.b #$47 : BNE ++
-					LDA.l TRockRequiredMedallion : TAX : LDA.l .medallion_type, X : CMP $0303 : BNE +
-					LDA $7EF2C7 : AND.b #$20 : BNE +
+					BRA .done
+				.trock
+				CMP.b #$47 : BNE .done
+					LDA.l TRockRequiredMedallion : TAX : LDA.l .medallion_type, X : CMP $0303 : BNE .done
+					LDA $7EF2C7 : AND.b #$20 : BNE .done
 					LDA.b #$08 : PHA : PLB ; set data bank to $08
 					LDY.b #$03 : JSL.l Ancilla_CheckIfEntranceTriggered : BCS .permit ; turtle rock
-				++
-			.done
-		+
+	.done
 	PLY : PLX : PLB
 	LDA $7EF359
 RTL
