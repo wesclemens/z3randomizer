@@ -616,7 +616,7 @@ Setup_ShopItemCollisionHitbox:
 	REP #$20 ; set 16-bit accumulator
 	PHA : PHY
 		LDA !SHOP_TYPE : AND.w #$0003 : DEC : ASL : TAY
-		LDA $A0 : CMP.l #$109 : BNE + : INY #6 : + 
+		LDA $A0 : CMP.l #$09 : BNE + : INY #6 : + 
 		LDA.w Shopkeeper_DrawNextItem_item_offsets_idx, Y : STA $00 ; get table from the table table
 	PLY : PLA
     
