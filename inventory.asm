@@ -966,6 +966,11 @@ LoadPowder:
 	%GetPossiblyEncryptedItem(WitchItem, SpriteItemValues)
 	STA $0DA0, Y ; Store item type
 	JSL.l PrepDynamicTile
+	STA $7F505E
+	LDA #$00
+	STA $7F505F
+	STA $7F5060
+	STA $7F5061
 RTL
 ;--------------------------------------------------------------------------------
 
@@ -987,18 +992,19 @@ RTL
 ;--------------------------------------------------------------------------------
 !REDRAW = "$7F5000"
 ;--------------------------------------------------------------------------------
-DrawPowder:
-	LDA $02DA : BNE .defer ; defer if link is buying a potion
-	LDA.l !REDRAW : BEQ +
-		%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
-		LDA $0DA0, X ; Retrieve stored item type
-		JSL.l PrepDynamicTile
-		LDA #$00 : STA.l !REDRAW ; reset redraw flag
-		BRA .defer
-	+
-	LDA $0DA0, X ; Retrieve stored item type
-	JSL.l DrawDynamicTile
-	.defer
+DrawPowder: 
+;	this fights with the shopkeep code, so had to move the powder draw there
+;	LDA $02DA : BNE .defer ; defer if link is buying a potion
+;	LDA.l !REDRAW : BEQ +
+;		%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+;		LDA $0DA0, X ; Retrieve stored item type
+;		JSL.l PrepDynamicTile
+;		LDA #$00 : STA.l !REDRAW ; reset redraw flag
+;		BRA .defer
+;	+
+;	LDA $0DA0, X ; Retrieve stored item type
+;	JSL.l DrawDynamicTile
+;	.defer
 RTL
 ;--------------------------------------------------------------------------------
 
