@@ -1164,7 +1164,7 @@ JSL.l DrawMushroom
 org $05EE97 ; <- 2EE97 - sprite_mushroom.asm : 81
 NOP #14
 ;--------------------------------------------------------------------------------
-org $05F529 ; <- 2F52C - sprite_potion_shop.asm
+org $05F529 ; <- 2F529 - sprite_potion_shop.asm
 JSL SpritePrep_ShopKeeper
 LDX #$0
 JSR $F539 ; <- powder spawn here
@@ -1179,8 +1179,7 @@ org $05F633 ; <- 2F633 - sprite_potion_shop.asm
 LDA $0E80, X : BNE +
 JSL Sprite_ShopKeeperPotion ;; TODO: i don't remember prices being set on top of the player 
 JSR $F893 ; <- witch behavior here
-RTS
-+
+RTS : +
 JSR $F644 ; <- powder behavior here 
 RTS
 ;--------------------------------------------------------------------------------

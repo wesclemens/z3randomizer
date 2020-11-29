@@ -57,8 +57,7 @@ macro DrawDigit(value,offset)
 	+
 	LDA $0E : STA !BIGRAM, X : INX : INX
 	LDA.w #56 : STA !BIGRAM, X : INX : INX
-	LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFCA : STA !BIGRAM-2, X : + ;; should just make this INC then ASL.  Also consider using shop id
-	;LDA.w #$ffca : STA !BIGRAM, X : INX : INX
+	LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFCA : STA !BIGRAM-2, X : + 
 	LDY $0A : TYA : ASL : TAY : LDA.w .digit_properties, Y : STA !BIGRAM, X : INX : INX
 	LDA.w #$0000 : STA !BIGRAM, X : INX : INX
 	
@@ -377,7 +376,7 @@ Shopkepeer_CallOriginal:
 ;!SHOP_CAPACITY = "$7F5020"
 ;!SCRATCH_TEMP_X = "$7F5021"
 Sprite_ShopKeeperPotion:
-	PHB : PHK : PLB
+	PHB : PHK : PLB ;; we can just call the default shopkeeper but the potion shopkeeper refills your health
 		JSR.w Shopkeeper_SetupHitboxes
 		JSR.w Shopkeeper_DrawItems
 	PLB
@@ -579,7 +578,6 @@ Shopkeeper_BuyItem:
 					TXA : !ADD !SHOP_SRAM_INDEX : TAX
 					LDA !SHOP_PURCHASE_COUNTS, X : INC : BEQ +++ : STA !SHOP_PURCHASE_COUNTS, X : +++
 				PLX
-				; LDA #$0 : STA !SHOP_KEEP_REFILL
 				BRA ++
 			+ ; Take-any
 			;STA $FFFFFF
@@ -593,6 +591,7 @@ Shopkeeper_BuyItem:
 					PHX : LDA.l !SHOP_SRAM_INDEX : TAX : LDA.l !SHOP_STATE : STA.l !SHOP_PURCHASE_COUNTS, X : PLX
 			++
 	.done
+	LDA #$0 : STA !SHOP_KEEP_REFILL
 	PLY : PLX
 RTS
 Shopkeeper_ItemMasks:
@@ -616,7 +615,7 @@ Setup_ShopItemCollisionHitbox:
 	REP #$20 ; set 16-bit accumulator
 	PHA : PHY
 		LDA !SHOP_TYPE : AND.w #$0003 : DEC : ASL : TAY
-		LDA $A0 : CMP.l #$09 : BNE + : INY #6 : + 
+		LDA $A0 : CMP.l #$109 : BNE + : INY #6 : + 
 		LDA.w Shopkeeper_DrawNextItem_item_offsets_idx, Y : STA $00 ; get table from the table table
 	PLY : PLA
     
@@ -700,6 +699,7 @@ RTS
 ;!SHOP_TYPE = "$7F5051"
 ;!SHOP_INVENTORY = "$7F5052"
 !SPRITE_OAM = "$7EC025"
+!REDRAW = "$7F5000"
 Shopkeeper_DrawItems:
 	PHB : PHK : PLB
 	PHX : PHY
@@ -708,15 +708,19 @@ Shopkeeper_DrawItems:
 	LDX.b #$00
 	LDY.b #$00
 	LDA !SHOP_TYPE : AND.b #$03
-	+ CMP.b #$03 : BNE +
+	CMP.b #$03 : BNE +
 		JSR.w Shopkeeper_DrawNextItem : BRA ++
 	+ CMP.b #$02 : BNE + : ++
 		JSR.w Shopkeeper_DrawNextItem : BRA ++
 	+ CMP.b #$01 : BNE + : ++
 		JSR.w Shopkeeper_DrawNextItem
 	+
-	LDA $A0 : CMP.l #$109 : BNE +
-	LDA !NPC_FLAGS_2 : AND.b #$20 : BNE +
+	LDA $A0 : CMP.b #$09 : BNE + ; render powder slot if potion shop
+	LDA !REDRAW : BNE + ; if not redrawing
+	LDA $02DA : BNE + ; if not buying item
+	LDA $7F505E : BEQ + ; if potion slot filled
+	LDA $0ABF : BEQ + : LDA $7EF344 : CMP.b #$02 : BEQ + ; if potion flags
+	LDA !NPC_FLAGS_2 : AND.b #$20 : BNE + ; more flags (this is longwinded and probably overkill)
 		LDX.b #$0C : LDY.b #$03 : JSR.w Shopkeeper_DrawNextItem
 	+
 	PLY : PLX
