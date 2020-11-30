@@ -107,7 +107,9 @@ RTS
 !FREE_TILE_BUFFER = "#$1180"
 !SHOP_ID = "$7F5050"
 !SHOP_TYPE = "$7F5051"
-!SHOP_INVENTORY = "$7F5052" ; $7F505E
+!SHOP_INVENTORY = "$7F5052" ; $7F5057 - 5d - 63
+!SHOP_INVENTORY_PLAYER = "$7F5062"
+!SHOP_INVENTORY_DISGUISE = "$7F5065"
 !SHOP_STATE = "$7F5068"
 !SHOP_CAPACITY = "$7F5069"
 !SCRATCH_TEMP_X = "$7F506A"
@@ -115,7 +117,6 @@ RTS
 !SHOP_MERCHANT = "$7F506C"
 !SHOP_DMA_TIMER = "$7F506D"
 !SHOP_KEEP_REFILL = "$7F506E"
-!SHOP_INVENTORY_PLAYER = "$7F506F"
 ;--------------------------------------------------------------------------------
 !NMI_AUX = "$7F5044"
 ;--------------------------------------------------------------------------------
@@ -166,7 +167,9 @@ SpritePrep_ShopKeeper:
 			LDA.l ShopContentsTable+1, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
 			LDA.l ShopContentsTable+2, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
 			LDA.l ShopContentsTable+3, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
-			LDA.l ShopContentsTable+8, X : PHX : TYX : STA.l !SHOP_INVENTORY_PLAYER, X : PLX
+			LDA.l ShopContentsTable+8, X : PHX : PHA
+			LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
+			PLA : STA.l !SHOP_INVENTORY_PLAYER, X : LDA #0 : STA.l !SHOP_INVENTORY_DISGUISE, X : PLX
 			LDA.l EnableRetroSkipArrow : BEQ ++++
 			LDA.l ShopContentsTable+1, X : CMP #$43 : BNE ++++
 			LDA.l $7EF377 : BEQ ++++
@@ -174,6 +177,8 @@ SpritePrep_ShopKeeper:
 				LDA.l ShopContentsTable+5, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
 				LDA.l ShopContentsTable+6, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
 				LDA.l ShopContentsTable+7, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
+				PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
+				LDA #0 : STA.l !SHOP_INVENTORY_PLAYER, X : PLX
 				BRA +++
 			++++
 			
@@ -193,8 +198,14 @@ SpritePrep_ShopKeeper:
 				++
 			PLY : +++
 			
+
 			PHX : PHY
-				PHX : TYX : LDA.l !SHOP_INVENTORY, X : PLX : TAY
+				PHX : TYX : LDA.l !SHOP_INVENTORY, X : PLX
+				CMP #$B0 : BNE +
+					PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
+				 	LSR #4 : !ADD $7F5088 : JSL GetStaticRNG : CMP #$B0 : BCC ++ : !SUB #$B0 
+					++ : STA.l !SHOP_INVENTORY_DISGUISE, X : PLX
+				+ : TAY
 				REP #$20 ; set 16-bit accumulator
 				LDA 1,s : TAX : LDA.l .tile_offsets, X : TAX
 				JSR LoadTile
@@ -565,7 +576,7 @@ Shopkeeper_BuyItem:
 				REP #$20 : LDA $7EF360 : !SUB !SHOP_INVENTORY+1, X : STA $7EF360 : SEP #$20 ; Take price away
 			++
 		.buy_real
-			LDA.l !SHOP_INVENTORY_PLAYER, X : STA !MULTIWORLD_ITEM_PLAYER_ID
+			PHX : LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : STA !MULTIWORLD_ITEM_PLAYER_ID : PLX
 			LDA.l !SHOP_INVENTORY, X : TAY : JSL.l Link_ReceiveItem
 			LDA.l !SHOP_INVENTORY+3, X : INC : STA.l !SHOP_INVENTORY+3, X
 			
@@ -768,7 +779,9 @@ Shopkeeper_DrawNextItem:
 
 	STA.l !SPRITE_OAM+4
 
-	LDA.l !SHOP_INVENTORY, X ; get item palette
+	PHX : LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_DISGUISE, X : PLX : CMP #$0 : BNE ++ 
+		LDA.l !SHOP_INVENTORY, X ; get item palette
+	++
 	JSL.l GetSpritePalette : STA.l !SPRITE_OAM+5
 
 	LDA.w .tile_indices, Y : AND.b #$01 : BEQ +; get item palette
@@ -779,7 +792,9 @@ Shopkeeper_DrawNextItem:
 
 	LDA.b #$00 : STA.l !SPRITE_OAM+6
 
-	LDA.l !SHOP_INVENTORY, X ; get item palette
+	PHX : LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_DISGUISE, X : PLX : CMP #$0 : BNE ++ 
+		LDA.l !SHOP_INVENTORY, X ; get item palette
+	++
 	JSL.l IsNarrowSprite : BCS .narrow
 	.full
 		LDA.b #$02
