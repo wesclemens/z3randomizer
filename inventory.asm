@@ -994,17 +994,17 @@ RTL
 ;--------------------------------------------------------------------------------
 DrawPowder: 
 ;	this fights with the shopkeep code, so had to move the powder draw there
-;	LDA $02DA : BNE .defer ; defer if link is buying a potion
-;	LDA.l !REDRAW : BEQ +
-;		%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
-;		LDA $0DA0, X ; Retrieve stored item type
-;		JSL.l PrepDynamicTile
-;		LDA #$00 : STA.l !REDRAW ; reset redraw flag
-;		BRA .defer
-;	+
+	LDA $02DA : BNE .defer ; defer if link is buying a potion
+	LDA.l !REDRAW : BEQ +
+		%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
+		LDA $0DA0, X ; Retrieve stored item type
+		JSL.l PrepDynamicTile
+		LDA #$00 : STA.l !REDRAW ; reset redraw flag
+		BRA .defer
+	+
 ;	LDA $0DA0, X ; Retrieve stored item type
 ;	JSL.l DrawDynamicTile
-;	.defer
+	.defer
 RTL
 ;--------------------------------------------------------------------------------
 
