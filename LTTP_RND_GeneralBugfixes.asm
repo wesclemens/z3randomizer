@@ -147,8 +147,8 @@ incsrc scratchpad.asm
 incsrc map.asm
 incsrc msu.asm
 incsrc dialog.asm
-incsrc events.asm
 incsrc entrances.asm
+incsrc clock.asm
 incsrc accessability.asm
 incsrc heartbeep.asm
 incsrc capacityupgrades.asm
@@ -195,7 +195,7 @@ incsrc compression.asm
 incsrc retro.asm
 incsrc dpadinvert.asm
 incsrc boots.asm
-incsrc clock.asm
+incsrc events.asm
 incsrc fileselect.asm
 incsrc playername.asm
 incsrc decryption.asm
@@ -720,4 +720,7 @@ Sprite_GetEmptyBottleIndex: ; this is totally in sprite_bees.asm
 
 org $1EF4E7
 Sprite_PlayerCantPassThrough:
+;================================================================================
+;Door Rando
+incsrc doorrando.asm
 ;================================================================================

@@ -16,8 +16,7 @@ RTL
 ;--------------------------------------------------------------------------------
 OnDrawHud:
 	JSL.l DrawChallengeTimer ; this has to come before NewDrawHud because the timer overwrites the compass counter
-	.DrHudOverride
-	print "DrHudOverride: ", pc
+	JSL.l DrHudOverride
 	JSL.l NewDrawHud
 	;JSL.l SwapSpriteIfNecissary
 	JSL.l PollService
@@ -129,6 +128,11 @@ OnNewFile:
 
 		LDX.w #$004E : - ; copy over starting equipment
 			LDA StartingEquipment, X : STA $7EF340, X
+			DEX : DEX
+		BPL -
+
+		LDX #$000E : -
+        	LDA $7EF37C, X : STA $7EF4E0, X
 			DEX : DEX
 		BPL -
 

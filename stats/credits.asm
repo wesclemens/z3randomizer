@@ -468,9 +468,11 @@ EndGameStats152:
 EndGameStats153:
     ;GT BIG KEY           $$$$/22
     db $02, $37, $63, $70, $9F, $5E, $65, $63, $9F, $67, $61, $75, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $A2, $55, $55
+	print "EndGameStats153: ", pc
 EndGameStats154:
     ;GT BIG KEY           $$$$/22
     db $02, $37, $89, $96, $9F, $84, $8B, $89, $9F, $8D, $87, $9B, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $C2, $7B, $7B
+	print "EndGameStats154: ", pc
 EndGameStats155:
     ;BONKS                   $$$$
     db $02, $09, $5E, $6B, $6A, $67, $6F
@@ -510,9 +512,11 @@ EndGameStats166:
 EndGameStats167:
     ;COLLECTION RATE     $$$$/216
     db $02, $37, $5F, $6B, $68, $68, $61, $5F, $70, $65, $6B, $6A, $9F, $6E, $5D, $70, $61, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $A2, $55, $54, $59
+	print "EndGameStats167: ", pc
 EndGameStats168:
     ;COLLECTION RATE     $$$$/216
     db $02, $37, $85, $91, $8E, $8E, $87, $85, $96, $8B, $91, $90, $9F, $94, $83, $96, $87, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $9F, $C2, $7B, $7A, $7F
+	print "EndGameStats168: ", pc
 EndGameStats169:
     ;TOTAL TIME       $$$$$$$$$$$
     db $02, $13, $70, $6B, $70, $5D, $68, $9F, $70, $65, $69, $61

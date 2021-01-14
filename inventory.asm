@@ -313,63 +313,21 @@ AddInventory:
 		;!SHAME_CHEST = "$7EF416" ; ---s ----
 		;LDA !SHAME_CHEST : ORA.w #$0010 : STA !SHAME_CHEST
 	;+
-print "compass_w_addr: ", pc
 	SEP #$20 ; Set 8-bit Accumulator
 
 	LDA $040C ; get dungeon id
+	BNE +
+		INC #2 ; treat sewers as HC
+	+ CMP #$FF : BEQ .fullItemCounts
 
-	CMP.b #$00 : BNE + ; Sewers (Escape)
-		BRA ++
-	+ CMP.b #$02 : BNE + ; Hyrule Castle (Escape)
-		++
-		CPY.b #$32 : BNE ++ : BRL .itemCounts : ++ ; Ball & Chain Guard's Big Key
-		%TopHalf($7EF434)
+	CMP.l BallNChainDungeon : BNE +
+		CPY.b #$32 : BNE +
 		BRL .fullItemCounts
-	+ CMP.b #$04 : BNE + ; Eastern Palace
-		LDA $7EF436 : INC : AND #$07 : TAX
-		LDA $7EF436 : AND #$F8 : STA $7EF436
-		TXA : ORA $7EF436 : STA $7EF436
-		BRL .fullItemCounts
-	+ CMP.b #$06 : BNE + ; Desert Palace
-		LDA $7EF435 : !ADD #$20 : STA $7EF435
-		BRL .fullItemCounts
-	+ CMP.b #$08 : BNE + ; Agahnim's Tower
-		LDA $7EF435 : INC : AND #$03 : TAX
-		LDA $7EF435 : AND #$FC : STA $7EF435
-		TXA : ORA $7EF435 : STA $7EF435
-		BRL .fullItemCounts
-	+ CMP.b #$0A : BNE + ; Swamp Palace
-		%BottomHalf($7EF439)
-		BRL .fullItemCounts
-	+ CMP.b #$0C : BNE + ; Palace of Darkness
-		%BottomHalf($7EF434)
-		BRL .fullItemCounts
-	+ CMP.b #$0E : BNE + ; Misery Mire
-		%BottomHalf($7EF438)
-		BRL .fullItemCounts
-	+ CMP.b #$10 : BNE + ; Skull Woods
-		%TopHalf($7EF437)
-		BRL .fullItemCounts
-	+ CMP.b #$12 : BNE + ; Ice Palace
-		%TopHalf($7EF438)
-		BRL .fullItemCounts
-	+ CMP.b #$14 : BNE + ; Tower of Hera
-		LDA $7EF435 : !ADD #$04 : AND #$1C : TAX
-		LDA $7EF435 : AND #$E3 : STA $7EF435
-		TXA : ORA $7EF435 : STA $7EF435
-		BRL .fullItemCounts
-	+ CMP.b #$16 : BNE + ; Thieves' Town
-		%BottomHalf($7EF437)
-		BRL .fullItemCounts
-	+ CMP.b #$18 : BNE + ; Turtle Rock
-		%TopHalf($7EF439)
-		BRL .fullItemCounts
-	+ CMP.b #$1A : BNE + ; Ganon's Tower
-		LDA $7EF436 : !ADD #$08 : STA $7EF436
+	+ LSR : TAX : LDA $7EF4BF, X : INC : STA $7EF4BF, X
+	CPX.b #$0D : BNE +
 		LDA $7EF366 : AND #$04 : BNE ++
 			JSR .incrementGTowerPreBigKey
 		++
-		;BRL .fullItemCounts
 	+
 
 	; == END INDOOR-ONLY SECTION
