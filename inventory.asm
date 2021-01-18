@@ -340,13 +340,19 @@ AddInventory:
 
 	LDA !MULTIWORLD_RECEIVING_ITEM : CMP #$01 : BEQ ++
 		LDA $7EF355 : BNE + ; Check for Boots
+			REP #$20
 			LDA $7EF432 : INC : STA $7EF432 ; Increment Pre Boots Counter
+			SEP #$20
 		+
 
 		LDA $7EF353 : BNE + ; Check for Mirror
-			LDA $7EF433 : INC : STA $7EF433 ; Increment Pre Mirror Counter
+			REP #$20
+			LDA $7EF434 : INC : STA $7EF434 ; Increment Pre Mirror Counter
+			SEP #$20
 		+
+		REP #$20
 		LDA $7EF423 : INC : STA $7EF423 ; Increment Item Total
+		SEP #$20
 	++
 
 	.itemCounts
@@ -650,7 +656,7 @@ RTS
 RTS
 
 .incrementMail
-	LDA $7EF424 : !ADD #$40 : STA $7EF424
+	LDA $7EF436 : !ADD #$40 : STA $7EF436
 RTS
 
 .incrementKeyLong
@@ -659,9 +665,9 @@ RTL
 
 .incrementKey
 	PHA : PHX
-		LDA $7EF424 : INC : AND #$3F : TAX
-		LDA $7EF424 : AND #$C0 : STA $7EF424
-		TXA : ORA $7EF424 : STA $7EF424
+		LDA $7EF436 : INC : AND #$3F : TAX
+		LDA $7EF436 : AND #$C0 : STA $7EF436
+		TXA : ORA $7EF436 : STA $7EF436
 	PLX : PLA
 RTS
 
