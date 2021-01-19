@@ -104,9 +104,9 @@ DrawPrice:
 
 		SEP #$20 ; set 8-bit accumulator
 		LDX $07 : LDA.l !SHOP_INVENTORY+3, X : CMP.b #$40 : !BGE +++ ; do not render on base items
-			LDA.b $07 : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : BEQ ++ ; use a different icon if multiworld
-			LDX $06 : LDA.b #$09 : STA !BIGRAM-3, X : LDA.b #$92 : STA !BIGRAM-4, X : BRA ++++ : ++
-			++ : LDX $06 : BRA ++++
+			; LDA.b $07 : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : BEQ ++ ; use a different icon if multiworld
+			; LDX $06 : LDA.b #$09 : STA !BIGRAM-3, X : LDA.b #$92 : STA !BIGRAM-4, X : BRA ++++ : ++
+			LDX $06 : BRA ++++
 		+++ : LDX $06 : DEX #8
 		++++
 		TXA : LSR #3 : STA $06 ; request 1-4 OAM slots
@@ -408,8 +408,8 @@ Shopkepeer_CallOriginal:
 Sprite_ShopKeeperPotion:
 	PHB : PHK : PLB ;; we can just call the default shopkeeper but the potion shopkeeper refills your health
 		LDA $A0 : CMP.b #$09 : BNE + 
-			JSR.w Shopkeeper_SetupHitboxes
 			JSR.w Shopkeeper_DrawItems
+			JSR.w Shopkeeper_SetupHitboxes
 		+
 	PLB
 RTL
@@ -574,7 +574,7 @@ Shopkeeper_BuyItem:
 		BRA +
 			.refill
 			JSL.l Sprite_GetEmptyBottleIndex : BMI .full_bottles
-			LDA #$1 : STA !SHOP_KEEP_REFILL
+			LDA #$1 : STA !SHOP_KEEP_REFILL ; If this is on, don't toggle bit to remove from shop
 		+
 
 		LDA !SHOP_TYPE : AND.b #$80 : BNE .buy ; don't charge if this is a take-any
@@ -622,7 +622,7 @@ Shopkeeper_BuyItem:
 					LDA.l !SHOP_STATE : ORA.w Shopkeeper_ItemMasks, X : STA.l !SHOP_STATE
 					PHX : LDA.l !SHOP_SRAM_INDEX : TAX : LDA.l !SHOP_STATE : STA.l !SHOP_PURCHASE_COUNTS, X : PLX
 			++
-			JSL SpritePrep_ShopKeeper
+			; JSL SpritePrep_ShopKeeper ;; reloads entire shop again
 	.done
 	LDA #$0 : STA !SHOP_KEEP_REFILL
 	PLY : PLX
