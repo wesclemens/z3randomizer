@@ -129,7 +129,7 @@ RTS
 !SHOP_TYPE = "$7F5051"
 ;!SHOP_INVENTORY = "$7F5052" ; $7F5056 - 5a - 5e
 ;!SHOP_INVENTORY_PLAYER = "$7F5062"
-!SHOP_INVENTORY_DISGUISE = "$7F5065"
+!SHOP_INVENTORY_DISGUISE = "$7F5065" ; was going to remove this, but this lets more than one bee trap exist with its own icon.  that might be excessive, but seeing two items obviously reveals if there's one or more beetraps
 !SHOP_STATE = "$7F5069"
 !SHOP_CAPACITY = "$7F506A"
 ;!SCRATCH_TEMP_X = "$7F506B"
@@ -221,7 +221,7 @@ SpritePrep_ShopKeeper:
 				PHX : TYX : LDA.l !SHOP_INVENTORY, X : PLX
 				CMP #$B0 : BNE +
 					PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
-				 	LSR #4 : !ADD $7F5088 : JSL GetStaticRNG : AND #$3F ; Get random value under #$3F
+					JSL GetRandomInt : AND #$3F : STA !BEE_TRAP_DISGUISE
 					BNE ++ : LDA #$49 : ++ : CMP #$26 : BNE ++ : LDA #$6A : ++ ; if 0 (fighter's sword + shield), set to just sword, if filled container (bugged palette), switch to triforce piece
 					STA.l !SHOP_INVENTORY_DISGUISE, X : PLX
 				+ : TAY
@@ -782,15 +782,31 @@ Shopkeeper_DrawNextItem:
 	PLY
 	
 	PHX : LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_DISGUISE, X : PLX : CMP #$0 : BNE ++ 
-		LDA.l !SHOP_INVENTORY, X ; get item id
+		LDA.l !SHOP_INVENTORY, X ; get item palette
 	++
 	CMP.b #$2E : BNE + : BRA .potion
 	+ CMP.b #$2F : BNE + : BRA .potion
 	+ CMP.b #$30 : BEQ .potion
+	CMP.b #$B1 : BEQ .fae
+	CMP.b #$B2 : BEQ .bee
+	CMP.b #$B3 : BEQ .jar
+	CMP.b #$B4 : BEQ .apple
 	.normal
 		LDA.w .tile_indices, Y : BRA + ; get item gfx index
 	.potion
 		LDA.b #$C0 ; potion is #$C0 because it's already there in VRAM
+		BRA +
+	.fae
+		LDA.b #$EA ; already there in VRAM
+		BRA +
+	.bee
+		LDA.b #$E4 ; already there in VRAM
+		BRA +
+	.jar
+		LDA.b #$62 ; already there in VRAM
+		BRA +
+	.apple
+		LDA.b #$E5 ; already there in VRAM
 	+
 	XBA
 
@@ -799,8 +815,6 @@ Shopkeeper_DrawNextItem:
 	+
 	XBA
 
-	AND #$FE
-
 	STA.l !SPRITE_OAM+4
 
 	PHX : LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_DISGUISE, X : PLX : CMP #$0 : BNE ++ 
@@ -808,7 +822,10 @@ Shopkeeper_DrawNextItem:
 	++
 	JSL.l GetSpritePalette : STA.l !SPRITE_OAM+5
 
-	LDA.w .tile_indices, Y : AND.b #$01 : BEQ +; get tile index sheet 
+	LDA.l !SPRITE_OAM+4 : CMP #$EA : BEQ .swap_sheet : CMP #$E4 : BEQ .swap_sheet : CMP #$62 : BEQ .swap_sheet : CMP #$E5 : BEQ .swap_sheet
+	AND #$FE : STA.l !SPRITE_OAM+4 ; if normal indices, strip last bit so it's even on the sprite sheet
+	LDA.w .tile_indices, Y : AND.b #$01 : BEQ +; get tile index sheet (swap sheet if we're using the upper tiles)
+		.swap_sheet
 		LDA.l !SPRITE_OAM+5
 		ORA.b #$1
 		STA.l !SPRITE_OAM+5
@@ -819,10 +836,17 @@ Shopkeeper_DrawNextItem:
 	PHX : LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_DISGUISE, X : PLX : CMP #$0 : BNE ++ 
 		LDA.l !SHOP_INVENTORY, X ; get item id for narrowness
 	++
+	CMP #$B2 : BEQ .single ; good bee single
 	JSL.l IsNarrowSprite : BCS .narrow
 	.full
 		LDA.b #$02
 		STA.l !SPRITE_OAM+7
+		LDA.b #$01
+		BRL ++
+	.single
+		LDA.b #$00
+		STA.l !SPRITE_OAM+7
+		JSR.w PrepNarrowLower
 		LDA.b #$01
 		BRA ++
 	.narrow

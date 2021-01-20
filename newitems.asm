@@ -408,6 +408,38 @@ AddReceivedItemExpandedGetItem:
 		LDA $22 : STA $0D10, Y : LDA $23 : STA $0D30, Y ; from enemizer's Spawn_Bees
 		LDA $20 : STA $0D00, Y : LDA $21 : STA $0D20, Y
 	+
+	+ CMP.b #$B1 : BNE + ; Faerie
+		LDA.b #$E3 : JSL Sprite_SpawnDynamically : BMI + ; DashBeeHive_SpawnBee
+		LDA $22 : STA $0D10, Y : LDA $23 : STA $0D30, Y ; from enemizer's Spawn_Bees
+		LDA $20 : STA $0D00, Y : LDA $21 : STA $0D20, Y
+        LDA #$30 : STA $0F10, Y ; temp invuln
+	+
+	+ CMP.b #$B2 : BNE + ; Bee (Gold)
+		LDA.b #$B2 : JSL Sprite_SpawnDynamically : BMI + ; DashBeeHive_SpawnBee
+		LDA $22 : STA $0D10, Y : LDA $23 : STA $0D30, Y ; from enemizer's Spawn_Bees
+		LDA $20 : STA $0D00, Y : LDA $21 : STA $0D20, Y
+        LDA #$38 : STA $0F10, Y ; temp invuln
+	+
+	+ CMP.b #$B3 : BNE + ; Magic
+		LDA.b #$E0 : JSL Sprite_SpawnDynamically : BMI + ; DashBeeHive_SpawnBee
+		LDA $22 : STA $0D10, Y : LDA $23 : STA $0D30, Y ; from enemizer's Spawn_Bees
+		LDA $20 : STA $0D00, Y : LDA $21 : STA $0D20, Y
+	+
+	+ CMP.b #$B4 : BNE + ; Apple
+		LDA.b #$AC : JSL Sprite_SpawnDynamically : BMI + ; DashBeeHive_SpawnBee
+		LDA $22 : STA $0D10, Y : LDA $23 : STA $0D30, Y ; from enemizer's Spawn_Bees
+		LDA $20 : STA $0D00, Y : LDA $21 : STA $0D20, Y
+	+
+	+ CMP.b #$B5 : BNE + ; Bomb
+        LDA.b #$4A : JSL Sprite_SpawnDynamically : BMI +
+		LDA $22 : STA $0D10, Y : LDA $23 : STA $0D30, Y ; from enemizer's Spawn_Bees
+		LDA $20 : STA $0D00, Y : LDA $21 : STA $0D20, Y
+        LDA.b #$06 : STA $0DD0, Y
+        LDA.b #$02 : STA $0DB0, Y : STA $0F50, Y
+        LDA.b #$09 : STA $0F60, Y
+        LDA.b #$1F : STA $0E00, Y
+        LDA.b #$03 : STA $0E40, Y
+	+
 	.done
 	PLX
 	LDA $02E9 : CMP.b #$01 ; thing we wrote over
@@ -686,7 +718,8 @@ AddReceivedItemExpanded:
 	;db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; *EVENT*
 
 	db $47 ; Bee Trap
-	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
+	db $47, $47, $47, $47 ; Fae, Bee, Jar, Apple
+	db $47, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
 	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
 	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
 	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused

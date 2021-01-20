@@ -2,6 +2,7 @@
 ; Utility Functions
 ;================================================================================
 !PROGRESSIVE_SHIELD = "$7EF416" ; ss-- ----
+!BEE_TRAP_DISGUISE = "$7EF4DA"
 ;--------------------------------------------------------------------------------
 ; GetSpriteTile
 ; in:	A - Loot ID
@@ -19,7 +20,12 @@ GetSpriteID:
 	CMP.b #$6D : BEQ .server_F0 ; Server Request F0
 	CMP.b #$6E : BEQ .server_F1 ; Server Request F1
 	CMP.b #$6F : BEQ .server_F2 ; Server Request F2
+	CMP.b #$B0 : BEQ .bee_trap 
 	BRA .normal
+		.bee_trap
+			LDA !BEE_TRAP_DISGUISE 
+			JSL.l GetSpriteID 
+			RTL
 		.bottle
 			PHA : JSR.w CountBottles : CMP.l BottleLimit : !BLT +
 				LDA !MULTIWORLD_SPRITEITEM_PLAYER_ID : BNE +
@@ -36,6 +42,7 @@ GetSpriteID:
 			BRA .normal
 		.server_F2
 			JSL.l ItemVisualServiceRequest_F2
+			BRA .normal
 	.normal
 		
 	PHX
@@ -161,7 +168,8 @@ RTL
 	db $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F ; Free Small Key
 
 	db $2C ; Bee Trap
-	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
+	db $2B, $2C, $32, $31 ; Fae, Bee, Jar, Apple
+	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
 	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
 	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
 	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
@@ -183,7 +191,13 @@ GetSpritePalette:
 	CMP.b #$3C : BEQ .bottle ; Bee w/bottle
 	CMP.b #$3D : BEQ .bottle ; Fairy w/bottle
 	CMP.b #$48 : BEQ .bottle ; Gold Bee w/bottle
+	CMP.b #$B0 : BEQ .bee_trap
 		BRA .notBottle
+		.bee_trap
+			;JSL.l GetRandomInt : AND.b #$3F ; select random value
+			LDA !BEE_TRAP_DISGUISE
+			JSL.l GetSpritePalette
+			RTL
 		.bottle
 			PHA : JSR.w CountBottles : CMP.l BottleLimit : !BLT +
 				PLA : LDA.l BottleLimitReplacement
@@ -290,7 +304,8 @@ RTL
 	db $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08 ; Free Big Key
 	db $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08 ; Free Small Key
 	db $04 ; Bee Trap
-	db $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08 ; Unused
+	db $08, $02, $08, $02 ; Fae, Bee, Jar, Apple
+	db $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08 ; Unused
 	db $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08 ; Unused
 	db $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08 ; Unused
 	db $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08 ; Unused
@@ -315,7 +330,12 @@ IsNarrowSprite:
 	CMP.b #$3C : BEQ .bottle ; Bee w/bottle
 	CMP.b #$3D : BEQ .bottle ; Fairy w/bottle
 	CMP.b #$48 : BEQ .bottle ; Gold Bee w/bottle
+	CMP.b #$B0 : BEQ .bee_trap
 		BRA .notBottle
+		.bee_trap
+			LDA !BEE_TRAP_DISGUISE
+			JSL.l IsNarrowSprite
+			BRL .done
 		.bottle
 			JSR.w CountBottles : CMP.l BottleLimit : !BLT +
 				LDA.l BottleLimitReplacement
@@ -379,7 +399,7 @@ RTL
 	db $15, $18, $24, $2A, $34, $35, $36, $42
 	db $43, $45, $59, $A0, $A1, $A2, $A3, $A4
 	db $A5, $A6, $A7, $A8, $A9, $AA, $AB, $AC
-	db $AD, $AE, $AF, $FF, $FF, $FF, $FF, $FF
+	db $AD, $AE, $AF, $B3, $FF, $FF, $FF, $FF
 }
 ;--------------------------------------------------------------------------------
 
@@ -401,6 +421,9 @@ PrepDynamicTile:
 		LDA #$00 : STA !MULTIWORLD_SPRITEITEM_PLAYER_ID
 		LDX #$6B
 	+
+	JSL GetRandomInt : AND #$3F ; pick random int every time we prep a tile, just in case it's a bee thing
+	BNE + : LDA #$49 : + : CMP #$26 : BNE + : LDA #$6A : + ; if 0 (fighter's sword + shield), set to just sword, if filled container (bugged palette), switch to triforce piece
+	STA !BEE_TRAP_DISGUISE
 	TXA
 	JSR.w LoadDynamicTileOAMTable
 	JSL.l GetSpriteID ; convert loot id to sprite id
