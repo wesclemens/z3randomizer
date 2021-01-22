@@ -319,6 +319,13 @@ AddInventory:
 	BNE +
 		INC #2 ; treat sewers as HC
 	+ CMP #$FF : BEQ .fullItemCounts
+	
+	CMP.b #$02 : BNE +
+		CPY.b #$32 : BNE + ; Check if Big key is for Sewers/Hyrule Castle
+			PHA
+			LDA.b #$C0 : ORA $7EF367 : STA $7EF367 ; Big Key 2
+			PLA
+	+
 
 	CMP.l BallNChainDungeon : BNE +
 		CPY.b #$32 : BNE +
