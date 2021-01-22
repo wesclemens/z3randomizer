@@ -752,8 +752,8 @@ Shopkeeper_DrawItems:
 	LDA !REDRAW : BNE + ; if not redrawing
 	LDA $02DA : BNE + ; if not buying item
 	LDA $7F505E : BEQ + ; if potion slot filled
-	LDA $0ABF : BEQ + : LDA $7EF344 : CMP.b #$02 : BEQ + ; if potion flags
-	;LDA !NPC_FLAGS_2 : AND.b #$20 : BNE + ; more flags (this is longwinded and probably overkill)
+	LDA $0ABF : BEQ + ; haven't left the room
+	LDA !NPC_FLAGS_2 : AND.b #$20 : BNE + 
 		LDX.b #$0C : LDY.b #$03 : JSR.w Shopkeeper_DrawNextItem
 	+
 	PLY : PLX
