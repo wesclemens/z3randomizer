@@ -414,12 +414,6 @@ AddReceivedItemExpandedGetItem:
 		LDA $20 : STA $0D00, Y : LDA $21 : STA $0D20, Y
         LDA #$30 : STA $0F10, Y ; temp invuln
 	+
-	+ CMP.b #$B2 : BNE + ; Bee (Gold)
-		LDA.b #$B2 : JSL Sprite_SpawnDynamically : BMI + ; DashBeeHive_SpawnBee
-		LDA $22 : STA $0D10, Y : LDA $23 : STA $0D30, Y ; from enemizer's Spawn_Bees
-		LDA $20 : STA $0D00, Y : LDA $21 : STA $0D20, Y
-        LDA #$38 : STA $0F10, Y ; temp invuln
-	+
 	+ CMP.b #$B3 : BNE + ; Magic
 		LDA.b #$E0 : JSL Sprite_SpawnDynamically : BMI + ; DashBeeHive_SpawnBee
 		LDA $22 : STA $0D10, Y : LDA $23 : STA $0D30, Y ; from enemizer's Spawn_Bees
@@ -718,7 +712,7 @@ AddReceivedItemExpanded:
 	;db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; *EVENT*
 
 	db $47 ; Bee Trap
-	db $47, $47, $47, $47 ; Fae, Bee, Jar, Apple
+	db $47, $2C, $47, $47 ; Fae, Bee, Jar, Apple
 	db $47, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
 	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
 	db $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49, $49 ; Unused
@@ -935,7 +929,7 @@ BottleListExpanded:
     db $16, $2B, $2C, $2D, $3D, $3C, $48
 
 PotionListExpanded:
-    db $2E, $2F, $30, $FF, $0E
+    db $2E, $2F, $30, $FF, $0E, $B2 ; FF is lack of item for faerie in a bottle
 ;--------------------------------------------------------------------------------
 Link_ReceiveItemAlternatesExpanded:
 {

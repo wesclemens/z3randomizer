@@ -921,7 +921,8 @@ NOP
 org $09892E ; 4892E - ancilla_init.asm:1307 (LDA BottleList, X)
 LDA.w BottleListExpanded, X
 
-org $09895C ; 4895C - ancilla_init.asm:1344 (LDA PotionList, X)
+org $09895A ; 4895A - ancilla_init.asm:1344 (LDA PotionList, X)
+LDX.b #$05
 LDA.w PotionListExpanded, X
 ;--------------------------------------------------------------------------------
 ;org $098A36 ; <- 48A36 - ancilla_init.asm:1432 (LDA AddReceiveItem.item_graphics_indices, Y : STA $72)
