@@ -571,6 +571,7 @@ Shopkeeper_BuyItem:
 		CMP.b #$2E : BEQ .refill ; Red Potion Refill
 		CMP.b #$2F : BEQ .refill ; Green Potion Refill
 		CMP.b #$30 : BEQ .refill ; Blue Potion Refill
+		CMP.b #$B2 : BEQ .refill ; Good Bee Refill
 		BRA +
 			.refill
 			JSL.l Sprite_GetEmptyBottleIndex : BMI .full_bottles
@@ -788,7 +789,6 @@ Shopkeeper_DrawNextItem:
 	+ CMP.b #$2F : BNE + : BRA .potion
 	+ CMP.b #$30 : BEQ .potion
 	CMP.b #$B1 : BEQ .fae
-	CMP.b #$B2 : BEQ .bee
 	CMP.b #$B3 : BEQ .jar
 	CMP.b #$B4 : BEQ .apple
 	.normal
@@ -798,9 +798,6 @@ Shopkeeper_DrawNextItem:
 		BRA +
 	.fae
 		LDA.b #$EA ; already there in VRAM
-		BRA +
-	.bee
-		LDA.b #$E4 ; already there in VRAM
 		BRA +
 	.jar
 		LDA.b #$62 ; already there in VRAM
@@ -836,7 +833,6 @@ Shopkeeper_DrawNextItem:
 	PHX : LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_DISGUISE, X : PLX : CMP #$0 : BNE ++ 
 		LDA.l !SHOP_INVENTORY, X ; get item id for narrowness
 	++
-	CMP #$B2 : BEQ .single ; good bee single
 	JSL.l IsNarrowSprite : BCS .narrow
 	.full
 		LDA.b #$02
