@@ -1493,8 +1493,8 @@ dw #9999 ; Rupee Limit
 ; $7F5042 - Tile Upload Offset Override (Low)
 ; $7F5043 - Tile Upload Offset Override (High)
 ; $7F5044 - $7F5046 - NMI Auxiliary Function
-; $7F5047 - $7F504F - Unused
-; $7F5050 - $7F506F - Shop Block
+; $7F5047 - $7F504E - Unused
+; $7F504F - $7F506F - Shop Block
 ; $7F5070 - Reserved for OneMind
 ; $7F5071 - Reserved for OneMind
 ; $7F5072 - $7F507D - Unused
@@ -1880,6 +1880,24 @@ GTBigKeyOf:
 org $30E400 ; PC 0x186400
 ;BerserkerMulti.world Seed GUID
 db #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00
+
+;--------------------------------------------------------------------------------
+;--------------------------------------------------------------------------------
+org $30E500 ; PC 0x186500
+; Retro Arrow collection
+
+;Shop auto-sell mask - If 2-3 adjacent shop slots have the single arrow, then mark ALL of them as sold.
+RetroArrowShopBoughtMask:
+db #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00
+db #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00
+db #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00
+db #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00
+
+;Shop slot SRAM index selling single arrows.  #$ff indicates end of list
+RetroArrowShopList:
+db #$ff, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00
+db #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00, #$00
+
 
 ;--------------------------------------------------------------------------------
 ; 0x186380 - 187FFF (unused)

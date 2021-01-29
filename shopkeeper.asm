@@ -191,19 +191,6 @@ SpritePrep_ShopKeeper:
 			LDA.l ShopContentsTable+8, X : PHX : PHA
 			LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
 			PLA : STA.l !SHOP_INVENTORY_PLAYER, X : LDA #0 : STA.l !SHOP_INVENTORY_DISGUISE, X : PLX
-			LDA.l EnableRetroSkipArrow : BEQ ++++
-			LDA.l ShopContentsTable+1, X : CMP #$43 : BNE ++++
-			LDA.l $7EF377 : BEQ ++++
-			LDA.l ShopContentsTable+4, X : BEQ ++++
-				--- ; assign alt item
-				LDA.l ShopContentsTable+5, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
-				LDA.l ShopContentsTable+6, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
-				LDA.l ShopContentsTable+7, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
-				LDA #$40 : PHX : TYX : STA.l !SHOP_INVENTORY+3, X : PLX
-				PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
-				LDA #0 : STA.l !SHOP_INVENTORY_PLAYER, X : PLX
-				BRA +++
-			++++
 			
 			PHY
 				PHX
@@ -213,7 +200,14 @@ SpritePrep_ShopKeeper:
 				
 				LDA.l ShopContentsTable+4, X : BEQ +
 				TYA : CMP.l ShopContentsTable+4, X : !BLT ++
-					PLY : BRA ---
+					PLY
+						LDA.l ShopContentsTable+5, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
+						LDA.l ShopContentsTable+6, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
+						LDA.l ShopContentsTable+7, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
+						LDA #$40 : PHX : TYX : STA.l !SHOP_INVENTORY+3, X : PLX
+						PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
+						LDA #0 : STA.l !SHOP_INVENTORY_PLAYER, X : PLX
+						BRA +++
 					+ : PLY : LDA #$40 : PHX : TYX : STA.l !SHOP_INVENTORY+3, X : PLX : BRA +++
 					++ : PLY : +++
 				
@@ -610,7 +604,23 @@ Shopkeeper_BuyItem:
 				+++
 				PHX
 					TXA : !ADD !SHOP_SRAM_INDEX : TAX
+
 					LDA !SHOP_PURCHASE_COUNTS, X : INC : BEQ +++ : STA !SHOP_PURCHASE_COUNTS, X : +++
+					
+					LDA.l RetroArrowShopBoughtMask, X : BEQ ++++ ; Confirm purchase was of a retro single arrow slot.
+					LDA.l RetroArrowShopList : PHX : TAX : LDA.l !SHOP_PURCHASE_COUNTS, X : BEQ +++ : PLX : BRA ++++ : +++ : PLX ; Check to see if all shop locationss already marked.
+					
+					LDA.l RetroArrowShopBoughtMask, X : BEQ ++++ : ORA.l !SHOP_STATE : STA.l !SHOP_STATE ; Prevent purchase of other single arrows in same shop.
+					LDX #$00
+					- LDA.l RetroArrowShopList, X : BMI ++++ ; If end of list, stop here.
+						PHX : TAX
+							LDA !SHOP_PURCHASE_COUNTS, X : BNE +++
+							INC : STA !SHOP_PURCHASE_COUNTS, X
+						+++
+						PLX
+						INX
+					BRA -
+					++++
 				PLX
 				BRA ++
 			+ ; Take-any
