@@ -602,7 +602,9 @@ Shopkeeper_BuyItem:
 				LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : STA !MULTIWORLD_ITEM_PLAYER_ID
 				TXA : !ADD !SHOP_SRAM_INDEX : TAX
 				LDA.l !SHOP_PURCHASE_COUNTS, X : BNE +++	;Is this the first time buying this slot?
-				LDA.l EnableShopItemCount, X : STA.l !SHOP_ENABLE_COUNT ; If so, store the permission to count the item here.
+				LDA.l !SHOP_TYPE : BIT.b #$20 : BNE +		;Is the shop location a take-any cave
+				LDA.l !SHOP_SRAM_INDEX : TAX				;If so, explicitly load first SRAM Slot.
+				+ : LDA.l EnableShopItemCount, X : STA.l !SHOP_ENABLE_COUNT ; If so, store the permission to count the item here.
 				+++
 			PLX
 			LDA.l !SHOP_INVENTORY, X : TAY : JSL.l Link_ReceiveItem
@@ -646,14 +648,12 @@ Shopkeeper_BuyItem:
 					LDA.l !SHOP_STATE : ORA.b #$07 : STA.l !SHOP_STATE
 					PHX
 						LDA.l !SHOP_SRAM_INDEX : TAX : LDA.b #$01 : STA.l !SHOP_PURCHASE_COUNTS, X
-						LDA.l EnableShopItemCount, X : STA.l !SHOP_ENABLE_COUNT
 					PLX
 					BRA ++
 				.takeAll
 					LDA.l !SHOP_STATE : ORA.w Shopkeeper_ItemMasks, X : STA.l !SHOP_STATE
 					PHX
 						LDA.l !SHOP_SRAM_INDEX : TAX : LDA.l !SHOP_STATE : STA.l !SHOP_PURCHASE_COUNTS, X
-						LDA.l EnableShopItemCount, X : STA.l !SHOP_ENABLE_COUNT
 					PLX
 			++
 			; JSL SpritePrep_ShopKeeper ;; reloads entire shop again
