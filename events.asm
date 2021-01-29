@@ -163,6 +163,7 @@ OnNewFile:
 		+
 
 		LDA StartingSword : STA $7EF359 ; set starting sword type
+		STA !HIGHEST_SWORD_LEVEL
 
 		; reset some values on new file that are otherwise only reset on hard reset
 		STZ $03C4 ; ancilla slot index
