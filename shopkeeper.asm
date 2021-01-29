@@ -215,7 +215,8 @@ SpritePrep_ShopKeeper:
 
 			PHX : PHY
 				PHX : TYX : LDA.l !SHOP_INVENTORY, X : PLX
-				CMP #$B0 : BNE +
+				CMP #$5A : BEQ ++
+				CMP #$B0 : BNE + : ++
 					PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
 					JSL GetRandomInt : AND #$3F : STA !BEE_TRAP_DISGUISE
 					BNE ++ : LDA #$49 : ++ : CMP #$26 : BNE ++ : LDA #$6A : ++ ; if 0 (fighter's sword + shield), set to just sword, if filled container (bugged palette), switch to triforce piece
