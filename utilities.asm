@@ -20,7 +20,8 @@ GetSpriteID:
 	CMP.b #$6D : BEQ .server_F0 ; Server Request F0
 	CMP.b #$6E : BEQ .server_F1 ; Server Request F1
 	CMP.b #$6F : BEQ .server_F2 ; Server Request F2
-	CMP.b #$B0 : BEQ .bee_trap 
+	CMP.b #$5A : BEQ .bee_trap
+	CMP.b #$B0 : BEQ .bee_trap
 	BRA .normal
 		.bee_trap
 			LDA !BEE_TRAP_DISGUISE 
@@ -191,6 +192,7 @@ GetSpritePalette:
 	CMP.b #$3C : BEQ .bottle ; Bee w/bottle
 	CMP.b #$3D : BEQ .bottle ; Fairy w/bottle
 	CMP.b #$48 : BEQ .bottle ; Gold Bee w/bottle
+	CMP.b #$5A : BEQ .bee_trap
 	CMP.b #$B0 : BEQ .bee_trap
 		BRA .notBottle
 		.bee_trap
@@ -330,6 +332,7 @@ IsNarrowSprite:
 	CMP.b #$3C : BEQ .bottle ; Bee w/bottle
 	CMP.b #$3D : BEQ .bottle ; Fairy w/bottle
 	CMP.b #$48 : BEQ .bottle ; Gold Bee w/bottle
+	CMP.b #$5A : BEQ .bee_trap
 	CMP.b #$B0 : BEQ .bee_trap
 		BRA .notBottle
 		.bee_trap
