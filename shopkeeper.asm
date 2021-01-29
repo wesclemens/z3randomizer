@@ -125,6 +125,7 @@ RTS
 ;--------------------------------------------------------------------------------
 !TILE_UPLOAD_OFFSET_OVERRIDE = "$7F5042"
 !FREE_TILE_BUFFER = "#$1180"
+!SHOP_ENABLE_COUNT = "$7F504F"
 !SHOP_ID = "$7F5050"
 !SHOP_TYPE = "$7F5051"
 ;!SHOP_INVENTORY = "$7F5052" ; $7F5056 - 5a - 5e

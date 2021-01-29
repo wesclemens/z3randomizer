@@ -286,8 +286,7 @@ AddInventory:
 			CMP.w #271 : BNE + : BRL .shop : + ; villiage of outcasts shop, lumberjack shop, lake hylia shop, dark world magic shop
 			CMP.w #272 : BNE + : BRL .shop : + ; red shield shop
 			CMP.w #284 : BNE + : BRL .shop : + ; bomb shop
-			;CMP.w #265 : BNE + : BRL .shop : + ; potion shop - commented this out because it's easier to just block potion refills because this one interferes with the powder item being counted
-			;CMP.w #271 : BNE + : BRL .shop : + ; lake hylia shop
+			CMP.w #265 : BNE + : BRL .shop : + ; potion shop - commented this out because it's easier to just block potion refills because this one interferes with the powder item being counted
 			CMP.w #287 : BNE + : BRL .shop : + ; kakariko shop
 			CMP.w #255 : BNE + : BRL .shop : + ; light world death mountain shop
 			CMP.w #276 : BNE + : BRL .shop : + ; waterfall fairy
@@ -295,7 +294,9 @@ AddInventory:
 			CMP.w #278 : BNE + : BRL .shop : + ; pyramid fairy
 		PLP : BRA ++
 		.shop
-		PLP : BRL .done
+		PLP
+		LDA.l !SHOP_ENABLE_COUNT : BNE ++
+		BRL .done
 	++
 
 	.dungeonCounts
@@ -1033,9 +1034,13 @@ CollectPowder:
 		; if for any reason the item value is 0 reload it, just in case
 		%GetPossiblyEncryptedItem(WitchItem, SpriteItemValues) : TAY
 	+
-	PHA : %GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID : PLA
+	PHA
+		%GetPossiblyEncryptedPlayerID(WitchItem_Player) : STA !MULTIWORLD_ITEM_PLAYER_ID
+		LDA.b #$01 : STA.l !SHOP_ENABLE_COUNT
+	PLA
     STZ $02E9 ; item from NPC
     JSL.l Link_ReceiveItem
+	PHA : LDA.b #$00 : STA.l !SHOP_ENABLE_COUNT : PLA
 	;JSL.l FullInventoryExternal
 	JSL.l ItemSet_Powder
 RTL
