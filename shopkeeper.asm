@@ -138,6 +138,7 @@ RTS
 !SHOP_MERCHANT = "$7F506D"
 !SHOP_DMA_TIMER = "$7F506E"
 !SHOP_KEEP_REFILL = "$7F506F"
+
 ;--------------------------------------------------------------------------------
 !NMI_AUX = "$7F5044"
 ;--------------------------------------------------------------------------------
@@ -555,6 +556,8 @@ Shopkeeper_SetupHitboxes:
 	
 	PLP : PLY : PLX
 RTS
+!LOCK_STATS = "$7EF443"
+!ITEM_TOTAL = "$7EF423"
 ;--------------------
 ;!SHOP_STATE
 Shopkeeper_BuyItem:
@@ -593,9 +596,17 @@ Shopkeeper_BuyItem:
 				REP #$20 : LDA $7EF360 : !SUB !SHOP_INVENTORY+1, X : STA $7EF360 : SEP #$20 ; Take price away
 			++
 		.buy_real
-			PHX : LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : STA !MULTIWORLD_ITEM_PLAYER_ID : PLX
+			print "Shop Check: ", pc
+			PHX
+				LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : STA !MULTIWORLD_ITEM_PLAYER_ID
+				TXA : !ADD !SHOP_SRAM_INDEX : TAX
+				LDA.l !SHOP_PURCHASE_COUNTS, X : BNE +++	;Is this the first time buying this slot?
+				LDA.l EnableShopItemCount, X : STA.l !SHOP_ENABLE_COUNT ; If so, store the permission to count the item here.
+				+++
+			PLX
 			LDA.l !SHOP_INVENTORY, X : TAY : JSL.l Link_ReceiveItem
 			LDA.l !SHOP_INVENTORY+3, X : INC : STA.l !SHOP_INVENTORY+3, X
+			LDA.b #0 : STA.l !SHOP_ENABLE_COUNT
 			
 			TXA : LSR #2 : TAX
 			LDA !SHOP_TYPE : BIT.b #$80 : BNE +
@@ -616,6 +627,10 @@ Shopkeeper_BuyItem:
 						PHX : TAX
 							LDA !SHOP_PURCHASE_COUNTS, X : BNE +++
 							INC : STA !SHOP_PURCHASE_COUNTS, X
+							
+							LDA !LOCK_STATS : BNE +++
+							LDA.l EnableShopItemCount, X : BEQ +++
+							REP #$20 : LDA !ITEM_TOTAL : INC : STA !ITEM_TOTAL : SEP #$20
 						+++
 						PLX
 						INX
@@ -628,11 +643,17 @@ Shopkeeper_BuyItem:
 				BIT.b #$20 : BNE .takeAll
 				.takeAny
 					LDA.l !SHOP_STATE : ORA.b #$07 : STA.l !SHOP_STATE
-					PHX : LDA.l !SHOP_SRAM_INDEX : TAX : LDA.b #$01 : STA.l !SHOP_PURCHASE_COUNTS, X : PLX
+					PHX
+						LDA.l !SHOP_SRAM_INDEX : TAX : LDA.b #$01 : STA.l !SHOP_PURCHASE_COUNTS, X
+						LDA.l EnableShopItemCount, X : STA.l !SHOP_ENABLE_COUNT
+					PLX
 					BRA ++
 				.takeAll
 					LDA.l !SHOP_STATE : ORA.w Shopkeeper_ItemMasks, X : STA.l !SHOP_STATE
-					PHX : LDA.l !SHOP_SRAM_INDEX : TAX : LDA.l !SHOP_STATE : STA.l !SHOP_PURCHASE_COUNTS, X : PLX
+					PHX
+						LDA.l !SHOP_SRAM_INDEX : TAX : LDA.l !SHOP_STATE : STA.l !SHOP_PURCHASE_COUNTS, X
+						LDA.l EnableShopItemCount, X : STA.l !SHOP_ENABLE_COUNT
+					PLX
 			++
 			; JSL SpritePrep_ShopKeeper ;; reloads entire shop again
 	.done
