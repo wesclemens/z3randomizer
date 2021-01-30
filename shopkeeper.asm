@@ -600,11 +600,12 @@ Shopkeeper_BuyItem:
 			print "Shop Check: ", pc
 			PHX
 				LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : STA !MULTIWORLD_ITEM_PLAYER_ID
-				TXA : !ADD !SHOP_SRAM_INDEX : TAX
-				LDA.l !SHOP_PURCHASE_COUNTS, X : BNE +++	;Is this the first time buying this slot?
-				LDA.l !SHOP_TYPE : BIT.b #$20 : BNE +		;Is the shop location a take-any cave
-				LDA.l !SHOP_SRAM_INDEX : TAX				;If so, explicitly load first SRAM Slot.
-				+ : LDA.l EnableShopItemCount, X : STA.l !SHOP_ENABLE_COUNT ; If so, store the permission to count the item here.
+				LDA.l !SHOP_TYPE : BIT.b #$80 : BNE +		;Is the shop location a take-any cave
+				TXA : !ADD !SHOP_SRAM_INDEX : TAX : BRA ++				;If so, explicitly load first SRAM Slot.
+				+ LDA.l !SHOP_SRAM_INDEX : TAX
+				
+				++ LDA.l !SHOP_PURCHASE_COUNTS, X : BNE +++	;Is this the first time buying this slot?
+				LDA.l EnableShopItemCount, X : STA.l !SHOP_ENABLE_COUNT ; If so, store the permission to count the item here.
 				+++
 			PLX
 			LDA.l !SHOP_INVENTORY, X : TAY : JSL.l Link_ReceiveItem
