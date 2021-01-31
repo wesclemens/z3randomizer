@@ -251,6 +251,7 @@ AddInventory:
 	+
 
 	.incrementCounts
+	CPY.b #$6A : BEQ + ; Skip !LOCK_STATS for Triforce. so that it counts towards the stat.
 	LDA !LOCK_STATS : BEQ + : BRL .done : +
 	
 	LDA !MULTIWORLD_ITEM_PLAYER_ID : BEQ +
