@@ -58,16 +58,19 @@ SEP #$30
 	
 ;================================================================================
 ; Draw Goal Item Indicator
+!GOAL_ELDER = "$7EF417"
 !GOAL_COUNTER = "$7EF418"
 !GOAL_DRAW_ADDRESS = "$7EC72A"
 ;================================================================================
 
-	SEP #$20
+	REP #$20
+	LDA.l !GOAL_ELDER : AND.w #$FF : BNE +
+	LDA.l GoalItemFlags : AND.w #$0001 : BEQ +  ; check flag for hide until get triforce piece
+	LDA.l !GOAL_COUNTER : BNE + : BRL .done : + ; if zero, skip hud writing
 	LDA.l GoalItemRequirement : BNE + : BRL .done : + ; Star Meter
 	
 	LDA.l !GOAL_COUNTER
-	JSR HudHexToDec3Digit
-	REP #$20
+	JSR HudHexToDec4Digit
 	
 	LDA.l GoalItemIcon : STA !GOAL_DRAW_ADDRESS ; draw star icon
 	
@@ -75,24 +78,24 @@ SEP #$30
 	LDX.b $06 : TXA : ORA.w #$2400 : STA !GOAL_DRAW_ADDRESS+4 ; draw 10's digit
 	LDX.b $07 : TXA : ORA.w #$2400 : STA !GOAL_DRAW_ADDRESS+6 ; draw 1's digit
 	
-	SEP #$20
-	LDA.l GoalItemRequirement : CMP.b #$FF : BEQ .skip
-	
+	LDA.l !GOAL_ELDER : AND.w #$FF : BNE .show_total
+	LDA.l GoalItemFlags : AND.w #$0002 : BNE .skip
+	.show_total
+	LDA.l GoalItemRequirement : CMP #$FFFF : BEQ .skip
 		LDA.l GoalItemRequirement
-		JSR HudHexToDec3Digit
-		REP #$20
+		JSR HudHexToDec4Digit
 		LDA.w #$2830 : STA !GOAL_DRAW_ADDRESS+8 ; draw slash
 		LDX.b $05 : TXA : ORA.w #$2400 : STA !GOAL_DRAW_ADDRESS+10 ; draw 100's digit
 		LDX.b $06 : TXA : ORA.w #$2400 : STA !GOAL_DRAW_ADDRESS+12 ; draw 10's digit
 		LDX.b $07 : TXA : ORA.w #$2400 : STA !GOAL_DRAW_ADDRESS+14 ; draw 1's digit
 		BRA .done
 	.skip
-		REP #$20
 		LDA.w #$207F ; transparent tile
 		STA !GOAL_DRAW_ADDRESS+8
 		STA !GOAL_DRAW_ADDRESS+10
 		STA !GOAL_DRAW_ADDRESS+12
 	.done
+	SEP #$20
 	
 ;================================================================================
 ; Draw Dungeon Compass Counts
