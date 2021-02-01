@@ -18,6 +18,12 @@ Overworld_LoadNewTiles:
         LDA #$05C2 : STA $7E27B4 ;added a pyramid peg on the left of the sign
     +
 
+    ; Flute sign
+    LDA InvertedMode : AND #$00FF : BEQ +
+    LDA $040A : AND #$00FF : CMP #$0058 : BNE +
+        LDA #$0101 : STA $7E2E44
+    +
+
     SEP #$30
     LDA InvertedMode : BEQ .notInverted
     PHB
@@ -878,7 +884,6 @@ LDA #$0185 : STA $2A06
 STA $2A86
 STA $2B06
 STA $2B86
-
 RTS
 }
 
