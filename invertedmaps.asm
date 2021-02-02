@@ -18,6 +18,12 @@ Overworld_LoadNewTiles:
         LDA #$05C2 : STA $7E27B4 ;added a pyramid peg on the left of the sign
     +
 
+    ; Flute sign
+    LDA InvertedMode : AND #$00FF : BEQ +
+    LDA $040A : AND #$00FF : CMP #$0058 : BNE +
+        LDA #$0101 : STA $7E2E44
+    +
+
     SEP #$30
     LDA InvertedMode : BEQ .notInverted
     PHB
@@ -348,8 +354,11 @@ LDA #$0491 : STA $25C0
 .agahnim2Alive
 
 ; add sign for Tower Entry
-LDA #$0101 : STA $7E222C
-LDA #$0101 : STA $7E2252
+; LDA #$0101 : STA $7E222C ; top left
+; LDA #$0101 : STA $7E2252 ; top right
+LDA #$0101 : STA $7E2946 ; lawn right (further in)
+; LDA #$0101 : STA $7E29C4 ; lawn right
+; LDA #$0101 : STA $7E34C4 ; gate right
 
 RTS
 }
@@ -878,7 +887,6 @@ LDA #$0185 : STA $2A06
 STA $2A86
 STA $2B06
 STA $2B86
-
 RTS
 }
 
