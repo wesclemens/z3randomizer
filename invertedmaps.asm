@@ -354,7 +354,7 @@ LDA #$0491 : STA $25C0
 .agahnim2Alive
 
 ; add sign for Tower Entry
-; LDA #$0101 : STA $7E222C ; top left
+LDA #$0101 : STA $7E222C ; top left
 ; LDA #$0101 : STA $7E2252 ; top right
 LDA #$0101 : STA $7E2946 ; lawn right (further in)
 ; LDA #$0101 : STA $7E29C4 ; lawn right
