@@ -36,6 +36,9 @@ macro UploadOAM(dest)
 	.done
 	PLP : PLA
 endmacro
+
+BigRAMStore:
+	STA !BIGRAM, X : INX : INX : RTS
 ;--------------------------------------------------------------------------------
 ; $0A : Digit Offset
 ; $0C-$0D : Value to Display
@@ -55,11 +58,11 @@ macro DrawDigit(value,offset)
 		LDY.b <offset>
 		LDA $0E : !ADD.w .digit_offsets, Y : STA $0E
 	+
-	LDA $0E : STA !BIGRAM, X : INX : INX
-	LDA.w #56 : STA !BIGRAM, X : INX : INX
+	LDA $0E : JSR BigRAMStore
+	LDA.w #56 : JSR BigRAMStore
 	LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFCA : STA !BIGRAM-2, X : + 
-	LDY $0A : TYA : ASL : TAY : LDA.w .digit_properties, Y : STA !BIGRAM, X : INX : INX
-	LDA.w #$0000 : STA !BIGRAM, X : INX : INX
+	LDY $0A : TYA : ASL : TAY : LDA.w .digit_properties, Y : JSR BigRAMStore
+	LDA.w #$0000 : JSR BigRAMStore
 	
 	LDA $0E : !ADD.w #$0008 : STA $0E ; move offset 8px right
 endmacro
@@ -75,6 +78,48 @@ DrawPrice:
 		LDY.b #$FF
 		LDX #$00 ; clear bigram pointer
 
+		LDA $0D : AND.w #$80 : BNE ++ 
+			BRL .normal_price
+			++
+			LDA $0E : !SUB.W #$04 : JSR BigRAMStore
+			LDA.w #56 : JSR BigRAMStore
+			LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFCA : STA !BIGRAM-2, X : + 
+			LDA $0D : AND #$000F : ASL : PHX : TAX : PHX : LSR : TAX;; Store OAM X, ICON array X (with A), LSR then get Adjust, then PLX 
+			LDA $0C : AND.w #$FF
+			LDY .adjust_value, X : BEQ +
+				- : LSR : DEY : BNE -
+			+ : STA $0C : PLX
+			LDA.w .icon_graphics, X : PLX : JSR BigRAMStore
+			;DEX : DEX : LDA.w #54 : STA !BIGRAM, X : INX : INX
+			CMP.w #$0563 : BNE +
+				LDA.w #54
+				JSR LongPriceIcon
+				LDA.w #$0573 : JSR BigRAMStore
+			+
+			CMP.w #$0D63 : BNE +
+				LDA.w #54
+				JSR LongPriceIcon
+				LDA.w #$0D73 : JSR BigRAMStore
+			+
+			CMP.w #$056B : BNE +
+				LDA.w #53
+				JSR LongPriceIcon
+				LDA.w #$057B : JSR BigRAMStore
+			+
+			CMP.w #$0272 : BNE +
+				PHX 
+				LDA $0C : ASL : TAX : LDA .icon_graphics_bottle, X
+				PLX : STA !BIGRAM-2, X
+				LDA.w #$0000 : JSR BigRAMStore
+				LDA $0E : !ADD.w #$8 : STA $0E ; move offset 8px right
+				BRL .len0
+			+
+			.icon_done
+			LDA.w #$0000 : JSR BigRAMStore
+			LDA $0E : !ADD.w #$8 : STA $0E ; move offset 8px right
+			BRL .len2
+
+		.normal_price
 		LDA $0C : CMP.w #1000 : !BLT + : BRL .len4 : +
 				  CMP.w #100 : !BLT + : BRL .len3 : +
 				  CMP.w #10 : !BLT + : BRL .len2 : +
@@ -90,17 +135,18 @@ DrawPrice:
 				%DrawDigit(#10,#2)
 			
 			.len1
+			.len0	
 				%DrawDigit(#1,#0)
 
-			.len0
+		.okay				
 
 		; set up shop shuffle star
 		; i set it all up before then backtrack (dex #8) because i hate 16-bit 8-bit accumulator logic mixups
-		LDA $0E : STA !BIGRAM, X : INX : INX ; change this to a set distance from center
-		LDA.w #36 : STA !BIGRAM, X : INX : INX
+		LDA $0E : JSR BigRAMStore ; change this to a set distance from center
+		LDA.w #36 : JSR BigRAMStore
 		LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFAA : STA !BIGRAM-2, X : + 
-		LDA.w #$0391 : STA !BIGRAM, X : INX : INX ; Yellow Star
-		LDA.w #$0000 : STA !BIGRAM, X : INX : INX : STX $06
+		LDA.w #$0391 : JSR BigRAMStore ; Yellow Star
+		LDA.w #$0000 : JSR BigRAMStore : STX $06
 
 		SEP #$20 ; set 8-bit accumulator
 		LDX $07 : LDA.l !SHOP_INVENTORY+3, X : CMP.b #$40 : !BGE +++ ; do not render on base items
@@ -123,6 +169,36 @@ DrawPrice:
 	PLP : PLY : PLX
 RTS
 ;--------------------------------------------------------------------------------
+.digit_properties
+dw $0230, $0231, $0202, $0203, $0212, $0213, $0222, $0223, $0232, $0233
+;--------------------------------------------------------------------------------
+.digit_offsets
+dw 4, 0, -4, -8
+;--------------------------------------------------------------------------------
+.icon_graphics
+dw $0329, $0960, $8570, $0563, $0d29, $8d70, $0d63, $056b, $0272
+;-------------------------------------------------------------------
+.icon_graphics_bottle
+dw $0372, $0972, $0572, $0b72, $0d72, $0d72
+;--------------------------------------------------------------------------------
+.adjust_value:
+db $03, $03, $00, $00, $03, $00, $00, $00, $00, $00, $00
+;------
+ResourceOffset:
+db $6D, $6E, $43, $77, $6C, $70, $71, $6F
+
+LongPriceIcon:
+	; A == Y offset
+	; Y == secondary Y offset (potentially)
+	STA !BIGRAM-4, X ; TODO: use subtraction for potion shop offset
+	LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFC8 : STA !BIGRAM-4, X : + 
+	LDA.w #$0000 : JSR BigRAMStore
+	LDA $0E : !SUB.W #$04 : JSR BigRAMStore ; arrow Y POSITION
+	LDA.w #58 : JSR BigRAMStore
+	LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFC8 : STA !BIGRAM-2, X : + 
+	RTS
+
+;--------------------------------------------------------------------------------
 !TILE_UPLOAD_OFFSET_OVERRIDE = "$7F5042"
 !FREE_TILE_BUFFER = "#$1180"
 !SHOP_ENABLE_COUNT = "$7F504F"
@@ -141,12 +217,6 @@ RTS
 
 ;--------------------------------------------------------------------------------
 !NMI_AUX = "$7F5044"
-;--------------------------------------------------------------------------------
-.digit_properties
-dw $0230, $0231, $0202, $0203, $0212, $0213, $0222, $0223, $0232, $0233
-;--------------------------------------------------------------------------------
-.digit_offsets
-dw 4, 0, -4, -8
 ;--------------------------------------------------------------------------------
 SpritePrep_ShopKeeper:
 	PHX : PHY : PHP
@@ -557,6 +627,14 @@ Shopkeeper_SetupHitboxes:
 	
 	PLP : PLY : PLX
 RTS
+
+GetFunnyBottleFunction:
+	; A = contents - 3 (red, green, blue, fairy, bee, goldbee)
+	PHX : PHA
+	LDA $7EF34F : BEQ .noBottle : TAX : DEX : PLA : !ADD #$3 : PHA
+	CMP $7EF35C, X : BNE .noBottle
+	.hasBottle : PLA : INX : TXA : PLX : RTS
+	.noBottle : PLA : PLX : LDA #$0 : RTS
 !LOCK_STATS = "$7EF443"
 !ITEM_TOTAL = "$7EF423"
 ;--------------------
@@ -573,11 +651,32 @@ Shopkeeper_BuyItem:
 		CMP.b #$B2 : BEQ .refill ; Good Bee Refill
 		BRA +
 			.refill
-			JSL.l Sprite_GetEmptyBottleIndex : BMI .full_bottles
 			LDA #$1 : STA !SHOP_KEEP_REFILL ; If this is on, don't toggle bit to remove from shop
+			JSL.l Sprite_GetEmptyBottleIndex : BPL + : BRL .full_bottles
 		+
 
-		LDA !SHOP_TYPE : AND.b #$80 : BNE .buy ; don't charge if this is a take-any
+		LDA !SHOP_TYPE : AND.b #$80 : BEQ + : BRL .buy : +; don't charge if this is a take-any
+
+		.custom_price
+		LDA !SHOP_INVENTORY+2, X : AND.b #$80 : BEQ ++ ; i honestly can't think of a better way to do this block because i haven't done asm in like 8 months
+		 	LDA !SHOP_INVENTORY+2, X : AND.b #$08 : BEQ + ; if bit 80, it's custom, if numbers 0-7, custom resource, 8 is potion
+				LDA !SHOP_INVENTORY+1, X : JSR GetFunnyBottleFunction : CMP #$0 : BNE .gotBottle
+					BRL .cant_afford
+				.gotBottle
+				PHX : LDA $7EF34F : TAX : DEX : LDA #$02 : STA $7EF35C, X : PLX : BRL .buy_real
+			+
+		 	LDA !SHOP_INVENTORY+2, X : AND.b #$07 ; if bit 80, it's custom, if numbers 0-7, custom resource
+				PHX : TAX : LDA ResourceOffset, X : TAX : TAY : LDA $7EF300, X : PLX ; fumble around with our resource value and price, sub value then put back into RAM
+		 		CMP !SHOP_INVENTORY+1,X : BMI + ; if resource is less than value, skip
+				!SUB !SHOP_INVENTORY+1,X : PHX : TYX : STA $7EF300, X 
+				CPX #$6C : BNE .notHeartContainers
+					CMP $7EF36D : !BGE .notHeartContainers : STA $7EF36D
+				.notHeartContainers
+				PLX : BRL .buy_real 
+			+
+		 	BRL .cant_afford
+		++
+
 		REP #$20 : LDA $7EF360 : CMP.l !SHOP_INVENTORY+1, X : SEP #$20 : !BGE .buy
 		
 		.cant_afford
