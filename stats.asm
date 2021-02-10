@@ -114,6 +114,8 @@
 ; m - mail counter
 ; k - small keys
 ;--------------------------------------------------------------------------------
+; $7EF46Bw[2] - Dungeon prizes collected by dungeon location.
+;--------------------------------------------------------------------------------
 ; $7EF4C0 - 7EF4CF - locations checked, indexed by 040C >> 1
 ;--------------------------------------------------------------------------------
 
@@ -387,6 +389,7 @@ IndoorSubtileTransitionCounter:
     STZ $0642
 JMP StatTransitionCounter
 ;--------------------------------------------------------------------------------
+!DUNGEON_PRIZE_COLLECTED = "$7EF46B"
 !CHEST_COUNTER = "$7EF442"
 !MAIL_COUNTER = "$7EF46A" ; mmkkkkkk
 !BOSS_KILLS = "$7F5037"
