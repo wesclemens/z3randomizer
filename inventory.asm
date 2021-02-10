@@ -353,7 +353,7 @@ AddInventory:
 
 		LDA $7EF353 : BNE + ; Check for Mirror
 			REP #$20
-			LDA $7EF434 : INC : STA $7EF434 ; Increment Pre Mirror Counter
+			LDA $7EF468 : INC : STA $7EF468 ; Increment Pre Mirror Counter
 			SEP #$20
 		+
 		REP #$20
@@ -662,7 +662,7 @@ RTS
 RTS
 
 .incrementMail
-	LDA $7EF436 : !ADD #$40 : STA $7EF436
+	LDA $7EF46A : !ADD #$40 : STA $7EF46A
 RTS
 
 .incrementKeyLong
@@ -671,9 +671,9 @@ RTL
 
 .incrementKey
 	PHA : PHX
-		LDA $7EF436 : INC : AND #$3F : TAX
-		LDA $7EF436 : AND #$C0 : STA $7EF436
-		TXA : ORA $7EF436 : STA $7EF436
+		LDA $7EF46A : INC : AND #$3F : TAX
+		LDA $7EF46A : AND #$C0 : STA $7EF46A
+		TXA : ORA $7EF46A : STA $7EF46A
 	PLX : PLA
 RTS
 
