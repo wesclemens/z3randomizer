@@ -292,7 +292,7 @@ RTS
 ;!SHOP_INVENTORY, X
 ;[id][$lo][$hi][purchase_counter]
 ;--------------------------------------------------------------------------------
-;!SHOP_PURCHASE_COUNTS = "$7EF302"
+;!SHOP_PURCHASE_COUNTS = "$7EF305"
 ;--------------------------------------------------------------------------------
 Shopkeeper_UploadVRAMTilesLong:
 	JSR.w Shopkeeper_UploadVRAMTiles
@@ -667,7 +667,7 @@ db #$01, #$02, #$04, #$08
 ;--------------------
 ;!SHOP_ID = "$7F5050"
 ;!SHOP_SRAM_INDEX = "$7F5062"
-;!SHOP_PURCHASE_COUNTS = "$7EF302"
+;!SHOP_PURCHASE_COUNTS = "$7EF305"
 ;--------------------
 Setup_ShopItemCollisionHitbox:
 ;The complications with XBA are to handle the fact that nintendo likes to store
