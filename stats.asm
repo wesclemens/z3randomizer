@@ -462,3 +462,8 @@ RTL
 ; Notes:
 ; s&q counter
 ;================================================================================
+
+SafeguardSRAM:
+	REP #$30
+	LDA $A0 : ASL A : CMP #$300 : BCC + : LDA #$2FF : + 
+	TAX : RTL
