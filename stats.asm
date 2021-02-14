@@ -465,8 +465,11 @@ RTL
 
 SafeguardSRAM: ; prevent Hobo and Zora to writing to our custom SRAM locations above 7ef300
 	REP #$30
-	LDA $10 : CMP #$0A : BEQ ++ : CMP #$0B : BNE + ; DNI if we're not in Special Overworld mode (we only want hobo and zora, but this probably applies to other special areas?)
-	++
-	LDA $A0 : ASL A : CMP #$300 : BCC + : LDA #$0 : STA $0408 : LDA #$2FF : + ; dunno just cap our SRAM writing to 0x2FF, unsure if this would ever collide with anything
+	LDA $10 : CMP #$0A : BEQ + : CMP #$0B : BNE .returnNormal ; DNI if we're not in Special Overworld mode (we only want hobo and zora, but this probably applies to other special areas?)
+	+	LDA $A0 : ASL A : CMP #$300 : BCC .return
+		LDA #$0 : STA $0408 : LDX #$2FF : BRA .return ; Just make our values not matter
 	; for certaincy's sake I think we could just pop the stack to end the function early, but dunno the differences between RTL and RTS to do so right now
-	TAX : RTL
+	.returnNormal
+		LDA $A0 : ASL A
+	.return
+		TAX : RTL
