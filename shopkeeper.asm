@@ -667,7 +667,7 @@ db #$01, #$02, #$04, #$08
 ;--------------------
 ;!SHOP_ID = "$7F5050"
 ;!SHOP_SRAM_INDEX = "$7F5062"
-;!SHOP_PURCHASE_COUNTS = "$7EF305"
+;!SHOP_PURCHASE_COUNTS = "$7EF302"
 ;--------------------
 Setup_ShopItemCollisionHitbox:
 ;The complications with XBA are to handle the fact that nintendo likes to store
