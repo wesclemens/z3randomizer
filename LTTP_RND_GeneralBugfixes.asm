@@ -35,7 +35,7 @@ db #$20, #$19, #$08, #$31 ; year/month/day
 !BGE = "BCS"
 
 ; Rando Specific SRAM assignments
-!SHOP_PURCHASE_COUNTS = "$7EF305" ;$7EF305 - $7EF33F (temporary home)
+!SHOP_PURCHASE_COUNTS = "$7EF302" ;$7EF302 - $7EF33F (temporary home)
 !INVENTORY_SWAP = "$7EF38C" ; [w]
 !INVENTORY_SWAP_2 = "$7EF38E" ; [w]
 !ITEM_LIMIT_COUNTS = "$7EF390" ; $7EF390 - ????

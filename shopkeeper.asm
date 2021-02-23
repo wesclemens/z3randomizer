@@ -292,7 +292,7 @@ RTS
 ;!SHOP_INVENTORY, X
 ;[id][$lo][$hi][purchase_counter]
 ;--------------------------------------------------------------------------------
-;!SHOP_PURCHASE_COUNTS = "$7EF305"
+;!SHOP_PURCHASE_COUNTS = "$7EF302"
 ;--------------------------------------------------------------------------------
 Shopkeeper_UploadVRAMTilesLong:
 	JSR.w Shopkeeper_UploadVRAMTiles

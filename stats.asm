@@ -463,10 +463,9 @@ RTL
 ; s&q counter
 ;================================================================================
 
-SafeguardSRAM:
+SafeguardSRAM: ; consider moving shop slots to 0x7EF306
 	REP #$30
-	LDA $A0 : ASL A : TAX : CPX #$300 : BCC .return ; return if under 0x300
-	LDA $10 : AND #$00FF : CMP #$000B : BEQ + : CMP #$000A : BNE .return : + ; skip if we're not an underworld map
-		LDA $0408 : AND #$0000 : STA $0408 : LDX #$2FE
+	LDA $A0 : ASL A : TAX : CPX #$302 : BCC .return ; return if under 0x302
+		LDA $0408 : AND #$0000 : STA $0408 : LDX #$2FE ; just dummy out the quadrant results
 	.return
 	RTL
