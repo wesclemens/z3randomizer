@@ -486,3 +486,14 @@ RTL
 ; Notes:
 ; s&q counter
 ;================================================================================
+
+SafeguardSRAM: ; consider moving shop slots to 0x7EF306
+	; I really doubt quadrant data is all that important, shouldn't matter that this is applied
+	; in this position.  IDs for Pedestal, Hobo and Zora are 0x180, 0x181, 0x182, which are ASL
+	; then indexed with 0x7EF000.  since NPC flags start at 0x7EF280, I doubt any other rooms
+	; apply here.
+	REP #$30
+	LDA $A0 : ASL A : TAX : CPX #$302 : BCC .return ; return if under 0x302
+		LDA $0408 : AND #$0000 : STA $0408 : LDX #$2FE ; just dummy out the quadrant results
+	.return
+	RTL

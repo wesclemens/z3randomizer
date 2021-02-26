@@ -477,6 +477,16 @@ JSL.l StatBonkCounter
 org $02B797 ; <- 13797 - Bank02.asm : 8712 (LDA.b #$19 : STA $10)
 JSL.l StatsFinalPrep
 ;--------------------------------------------------------------------------------
+; This is a very specific safeguard from writing quadrant data over SRAM slots that belong to values greater than 0x300
+; i.e. $A0 area values which are greater than or equal to 0x180, which are then ASL
+; Unsure where this ever occurs, and should be investigated further
+org $02B81F ; <- 13947 - Bank02.asm (This overwrites X value of a LDA 7EF000, X : ORA $0408 : STA 7EF000, X)
+JSL.l SafeguardSRAM
+;org $02C11A ; <- 13947 - Bank02.asm 
+;JSL.l SafeguardSRAM
+;org $02B949 ; <- 13947 - Bank02.asm 
+;JSL.l SafeguardSRAM
+;--------------------------------------------------------------------------------
 org $07A95B ; <- 3A95B - Bank07.asm : 6565 (JSL Dungeon_SaveRoomData)
 JSL.l IncrementUWMirror
 ;--------------------------------------------------------------------------------
@@ -1615,6 +1625,10 @@ JSL.l SetUncleRainState : RTS
 ;--------------------------------------------------------------------------------
 ;org $0280DD ; <- 100DD - Bank02.asm:298 - (LDA $7EF3C5 : CMP.b #$02 : BCC .indoors)
 ;JSL.l ForceLinksHouse
+;--------------------------------------------------------------------------------
+org $02A3C4 ; <- 124CD - Bank02.asm:298 - (LDA $7EF3C5 : CMP.b #$02 : BCC .indoors)
+JSL.l Overworld_RemoveRainLong : BNE + : RTL : +
+NOP #15
 ;--------------------------------------------------------------------------------
 org $05EDDF ; <- 2EDDF - sprite_zelda.asm:398 - (LDA.b #$02 : STA $7EF3C5)
 JSL.l EndRainState : NOP #2
