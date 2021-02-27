@@ -1626,9 +1626,10 @@ JSL.l SetUncleRainState : RTS
 ;org $0280DD ; <- 100DD - Bank02.asm:298 - (LDA $7EF3C5 : CMP.b #$02 : BCC .indoors)
 ;JSL.l ForceLinksHouse
 ;--------------------------------------------------------------------------------
-org $02A3C4 ; <- 124CD - Bank02.asm:298 - (LDA $7EF3C5 : CMP.b #$02 : BCC .indoors)
-JSL.l Overworld_RemoveRainLong : BNE + : RTL : +
-NOP #15
+org $02A3C4 ; <- 123C4 - Bank02.asm:298 - (LDA $7EF3C5 : CMP.b #$02 : BCC .skip_movement) (look at 124CD)
+JSL.l Overworld_RemoveRainLong
+NOP #8
+db #$F0 ; Change BCS to BEQ branch
 ;--------------------------------------------------------------------------------
 org $05EDDF ; <- 2EDDF - sprite_zelda.asm:398 - (LDA.b #$02 : STA $7EF3C5)
 JSL.l EndRainState : NOP #2
