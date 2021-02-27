@@ -44,7 +44,8 @@ CheckGanonVulnerability:
 		BRA .success
 	+ : CMP #$05 : BNE +
 		;#$05 = Require Goal Items
-		LDA.l !GOAL_COUNTER : CMP GoalItemRequirement : !BLT .fail ; require specified number of goal items
+		REP #$20
+		LDA.l !GOAL_COUNTER : CMP GoalItemRequirement : SEP #$20 : !BLT .fail ; require specified number of goal items
 		BRA .success
 	+ : CMP #$06 : BNE +
 	    ;#$06 = Require pedestal to be pulled
