@@ -6,7 +6,7 @@ Overworld_RemoveRainLong:
 
     LDA $8A : CMP #$70 : BNE + 
         LDA $7EF2F0 : AND.b #$20 : BNE .endNoRainClearOverlay
-        LDA $0410 : ORA $0416 : ORA $0418 : BNE .endNoRainClearOverlay ; if we're transitioning at a direction
+        LDA $0418 : BNE .endNoRainClearOverlay ; if we're transitioning at a direction
             BRA .endWithRain
     +
 
