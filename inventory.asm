@@ -328,7 +328,7 @@ AddInventory:
 
 	CMP.l BallNChainDungeon : BNE +
 		CPY.b #$32 : BNE +
-		BRL .fullItemCounts
+		BRL .done
 	+ LSR : TAX : LDA $7EF4BF, X : INC : STA $7EF4BF, X
 	CPX.b #$0D : BNE +
 		LDA $7EF366 : AND #$04 : BNE ++
