@@ -474,6 +474,9 @@ JSL.l CheckGanonHammerDamage : NOP
 org $079202 ; 39202 <- Bank07.asm : 2859 (JSL AddDashTremor)
 JSL.l StatBonkCounter
 ;--------------------------------------------------------------------------------
+org $02B793 ; <- 13793 - Bank02.asm : 8709 (JSL Dungeon_SaveRoomData_justKeys)
+JML NoEGtoTriforce
+
 org $02B797 ; <- 13797 - Bank02.asm : 8712 (LDA.b #$19 : STA $10)
 JSL.l StatsFinalPrep
 ;--------------------------------------------------------------------------------

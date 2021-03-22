@@ -497,3 +497,20 @@ SafeguardSRAM: ; consider moving shop slots to 0x7EF306
 		LDA $0408 : AND #$0000 : STA $0408 : LDX #$2FE ; just dummy out the quadrant results
 	.return
 	RTL
+	
+NoEGtoTriforce: ; If it is not possible to beat ganon, then make it impossible to get the triforce.
+	LDA.l EnableEGtoTriforce : BNE .triforce
+    JSL CheckGanonVulnerability
+	BCC .no_triforce
+	LDA.l $7EF359 : CMP #$02 : !BLT .check_hammer : BRA .triforce
+	
+	.check_hammer
+	LDA.l HammerableGanon : BEQ .no_triforce
+	LDA.l $7EF34B : BEQ .no_triforce
+	
+	.triforce
+	JSL $02A0BE	; Dungeon_SaveRoomData_justKeys
+	JML $02B797
+	
+	.no_triforce
+	JML $02B7A1
