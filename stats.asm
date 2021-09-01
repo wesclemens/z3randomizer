@@ -47,15 +47,9 @@
 ;--------------------------------------------------------------------------------
 ; $7EF430w[2] - loop frame counter (high)
 ;--------------------------------------------------------------------------------
-; $7EF432 - locations before boots
+; $7EF432w[2] - locations before boots
 ;--------------------------------------------------------------------------------
-; $7EF434 - locations before mirror
-;--------------------------------------------------------------------------------
-; $7EF436 mmkkkkkk
-; m - mail counter
-; k - small keys
-;--------------------------------------------------------------------------------
-; $7EF437-7EF439 - free space
+; $7EF434-7EF439 - FORMER COMPASS COUNTERS. DO NOT REUSE.
 ;--------------------------------------------------------------------------------
 ; $7EF43A - times mirrored outdoors
 ;--------------------------------------------------------------------------------
@@ -114,8 +108,37 @@
 ;--------------------------------------------------------------------------------
 ; $7EF466w[2] - mirror timestamp (high)
 ;--------------------------------------------------------------------------------
+; $7EF468w[2] - locations before mirror
+;--------------------------------------------------------------------------------
+; $7EF46A mmkkkkkk
+; m - mail counter
+; k - small keys
+;--------------------------------------------------------------------------------
+; $7EF46Bw[2] - Dungeon prizes collected by dungeon location.
+;--------------------------------------------------------------------------------
+; $7EF46D - 7EF49F - Free space
+;--------------------------------------------------------------------------------
+; $7EF4A0 - 7EF4A7 - Service Request
+;--------------------------------------------------------------------------------
+; $7EF4A8 - 7EF4AF - Free space
+;--------------------------------------------------------------------------------
+; $7EF4B0 - 7EF4BF - Absorbed keys, indexed by 040C >> 1
+;--------------------------------------------------------------------------------
 ; $7EF4C0 - 7EF4CF - locations checked, indexed by 040C >> 1
 ;--------------------------------------------------------------------------------
+; $7EF4D0 - 7EF4DA - Multiworld controls
+;--------------------------------------------------------------------------------
+; $7EF4DB - 7EF4DF - Free space
+;--------------------------------------------------------------------------------
+; $7EF4E0 - 7EF4EF - Collected Keys, indexed by 040C >> 1
+;--------------------------------------------------------------------------------
+; $7EF4F0 - Fresh File Marker.
+;--------------------------------------------------------------------------------
+; $7EF4F1 - 7EF4FD - Free space
+;--------------------------------------------------------------------------------
+; 7EF4FEw[2] - Save Checksum
+;--------------------------------------------------------------------------------
+
 
 ;--------------------------------------------------------------------------------
 !LOCK_STATS = "$7EF443"
@@ -387,8 +410,9 @@ IndoorSubtileTransitionCounter:
     STZ $0642
 JMP StatTransitionCounter
 ;--------------------------------------------------------------------------------
+!DUNGEON_PRIZE_COLLECTED = "$7EF46B"
 !CHEST_COUNTER = "$7EF442"
-!MAIL_COUNTER = "$7EF436" ; mmkkkkkk
+!MAIL_COUNTER = "$7EF46A" ; mmkkkkkk
 !BOSS_KILLS = "$7F5037"
 !SWORD_KILLS_1 = "$7EF425"
 !SWORD_KILLS_2 = "$7EF426"
@@ -462,3 +486,31 @@ RTL
 ; Notes:
 ; s&q counter
 ;================================================================================
+
+SafeguardSRAM: ; consider moving shop slots to 0x7EF306
+	; I really doubt quadrant data is all that important, shouldn't matter that this is applied
+	; in this position.  IDs for Pedestal, Hobo and Zora are 0x180, 0x181, 0x182, which are ASL
+	; then indexed with 0x7EF000.  since NPC flags start at 0x7EF280, I doubt any other rooms
+	; apply here.
+	REP #$30
+	LDA $A0 : ASL A : TAX : CPX #$302 : BCC .return ; return if under 0x302
+		LDA $0408 : AND #$0000 : STA $0408 : LDX #$2FE ; just dummy out the quadrant results
+	.return
+	RTL
+	
+NoEGtoTriforce: ; If it is not possible to beat ganon, then make it impossible to get the triforce.
+	LDA.l EnableEGtoTriforce : BNE .triforce
+    JSL CheckGanonVulnerability
+	BCC .no_triforce
+	LDA.l $7EF359 : CMP #$02 : !BLT .check_hammer : BRA .triforce
+	
+	.check_hammer
+	LDA.l HammerableGanon : BEQ .no_triforce
+	LDA.l $7EF34B : BEQ .no_triforce
+	
+	.triforce
+	JSL $02A0BE	; Dungeon_SaveRoomData_justKeys
+	JML $02B797
+	
+	.no_triforce
+	JML $02B7A1

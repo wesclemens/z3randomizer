@@ -201,6 +201,7 @@ incsrc playername.asm
 incsrc decryption.asm
 incsrc hashalphabet.asm
 incsrc inverted.asm
+incsrc removerain.asm
 incsrc invertedmaps.asm
 incsrc newhud.asm
 incsrc compasses.asm
