@@ -100,16 +100,31 @@ DrawPrice:
 		LDA $0D : AND.w #$80 : BNE ++ 
 			BRL .normal_price
 			++
+			; AT price location $0C-0D
+			; 0D item type (if highest bit is set 0x80, use 0x7F to determine type of price)
+			; 0C special price value 1-255
+			; Rupees = (normal price type)
+			; Hearts = 0
+			; Magic = 1
+			; Bomb = 2
+			; Arrows = 3
+			; HeartContainer = 4
+			; BombUpgrade = 5
+			; ArrowUpgrade = 6
+			; Keys = 7
+			; Potion = 8
+			; Item = 9
 			LDA $0E : !SUB.W #$04 : JSR BigRAMStore
 			LDA.w #56 : JSR BigRAMStore
-			LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFCA : STA !BIGRAM-2, X : + 
+			LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFCA : STA !BIGRAM-2, X : + ; potion shop check
 			LDA $0D : AND #$000F : ASL : PHX : TAX : PHX : LSR : TAX;; Store OAM X, ICON array X (with A), LSR then get Adjust, then PLX 
 			LDA $0C : AND.w #$FF
-			LDY .adjust_value, X : BEQ +
+			LDY .adjust_value, X : BEQ + ; Adjust "value" to less arbitrary number, (a 255 value of magic reduced to 32 pips) but should probably just use graphcis
 				- : LSR : DEY : BNE -
 			+ : STA $0C : PLX
 			LDA.w .icon_graphics, X : PLX : JSR BigRAMStore
-			;DEX : DEX : LDA.w #54 : STA !BIGRAM, X : INX : INX
+			; Compare current Icon_Graphics (didn't feel like reloading price) to determine further icon adjusting
+			; We should be able to just write new graphics and patch them in instead, but I don't know how to do that with SNES
 			CMP.w #$0563 : BNE +
 				LDA.w #54
 				JSR LongPriceIcon
@@ -182,16 +197,16 @@ dw $0230, $0231, $0202, $0203, $0212, $0213, $0222, $0223, $0232, $0233
 dw 4, 0, -4, -8
 ;--------------------------------------------------------------------------------
 .icon_graphics
-dw $0329, $0960, $8570, $0563, $0d29, $8d70, $0d63, $056b, $0272
+dw $0329, $0960, $8570, $0563, $0d29, $8d70, $0d63, $056b, $0272, $0991
 ;-------------------------------------------------------------------
 .icon_graphics_bottle
 dw $0372, $0972, $0572, $0b72, $0d72, $0d72
 ;--------------------------------------------------------------------------------
 .adjust_value:
-db $03, $03, $00, $00, $03, $00, $00, $00, $00, $00, $00
+db $03, $03, $00, $00, $03, $00, $00, $00, $00, $00, $00, $00
 ;------
-ResourceOffset:
-db $6D, $6E, $43, $77, $6C, $70, $71, $6F
+ResourceOffset: ; where is our special price (8-bit) in memory relative to memaddress (i forgot the address)
+db $6D, $6E, $43, $77, $6C, $70, $71, $6F, $00
 
 LongPriceIcon:
 	; A == Y offset
@@ -664,19 +679,28 @@ Shopkeeper_BuyItem:
 			JSL.l Sprite_GetEmptyBottleIndex : BPL + : BRL .full_bottles
 		+
 
-		LDA !SHOP_TYPE : AND.b #$80 : BEQ + : BRL .buy : +; don't charge if this is a take-any
+		LDA !SHOP_TYPE : AND.b #$80 : BEQ + : BRL .buy : + ; don't charge if this is a take-any
 
 		.custom_price
-		LDA !SHOP_INVENTORY+2, X : AND.b #$80 : BEQ ++ ; i honestly can't think of a better way to do this block because i haven't done asm in like 8 months
-		 	LDA !SHOP_INVENTORY+2, X : AND.b #$08 : BEQ + ; if bit 80, it's custom, if numbers 0-7, custom resource, 8 is potion
+		LDA !SHOP_INVENTORY+2, X : AND.b #$80 : BEQ .price_is_rupees ; i honestly can't think of a better way to do this block because i haven't done asm in like 8 months
+		 	LDA !SHOP_INVENTORY+2, X : AND.b #$7F : CMP.b #$09 : BNE + ; 09 specifically is item
+				LDA !SHOP_INVENTORY+1, X : CMP.b $0303 : BNE .gotItem
+					BRL .cant_afford
+				.gotItem ; hand it over??  not logic friendly
+				BRL .buy_real
+			+
+		 	CMP.b #$08 : BNE + ; 08 specifically is potion
 				LDA !SHOP_INVENTORY+1, X : JSR GetFunnyBottleFunction : CMP #$0 : BNE .gotBottle
 					BRL .cant_afford
 				.gotBottle
 				PHX : LDA $7EF34F : TAX : DEX : LDA #$02 : STA $7EF35C, X : PLX : BRL .buy_real
 			+
-		 	LDA !SHOP_INVENTORY+2, X : AND.b #$07 ; if bit 80, it's custom, if numbers 0-7, custom resource
+			LDA !SHOP_INVENTORY+2, X : AND.b #$07 ; if bit 80, it's custom, if numbers 0-7, custom resource
+				; store shop index, get resource offset (X), load val, pop shop index, cmp val to shop_price...
 				PHX : TAX : LDA ResourceOffset, X : TAX : TAY : LDA $7EF300, X ; fumble around with our resource value and price, sub value then put back into RAM
 				PLX : CMP !SHOP_INVENTORY+1,X : BMI + ; if resource is less than value, skip
+				; subtract and store, store (x), store val back to address
+				; if X is heart containers, set ordinary hearts
 				!SUB !SHOP_INVENTORY+1,X : PHX : TYX : STA $7EF300, X 
 				CPX #$6C : BNE .notHeartContainers
 					CMP $7EF36D : !BGE .notHeartContainers : STA $7EF36D
@@ -684,7 +708,7 @@ Shopkeeper_BuyItem:
 				PLX : BRL .buy_real 
 			+
 		 	BRL .cant_afford
-		++
+		.price_is_rupees
 
 		REP #$20 : LDA $7EF360 : CMP.l !SHOP_INVENTORY+1, X : SEP #$20 : !BGE .buy
 		
@@ -766,7 +790,7 @@ Shopkeeper_BuyItem:
 						LDA.l !SHOP_SRAM_INDEX : TAX : LDA.l !SHOP_STATE : STA.l !SHOP_PURCHASE_COUNTS, X
 					PLX
 			++
-			JSL.l ReloadShopkeep
+			; JSL.l ReloadShopkeep
 	.done
 	LDA #$0 : STA !SHOP_KEEP_REFILL
 	PLY : PLX
