@@ -36,6 +36,9 @@ macro UploadOAM(dest)
 	.done
 	PLP : PLA
 endmacro
+
+BigRAMStore:
+	STA !BIGRAM, X : INX : INX : RTS
 ;--------------------------------------------------------------------------------
 ; $0A : Digit Offset
 ; $0C-$0D : Value to Display
@@ -55,11 +58,11 @@ macro DrawDigit(value,offset)
 		LDY.b <offset>
 		LDA $0E : !ADD.w .digit_offsets, Y : STA $0E
 	+
-	LDA $0E : STA !BIGRAM, X : INX : INX
-	LDA.w #56 : STA !BIGRAM, X : INX : INX
+	LDA $0E : JSR BigRAMStore
+	LDA.w #56 : JSR BigRAMStore
 	LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFCA : STA !BIGRAM-2, X : + 
-	LDY $0A : TYA : ASL : TAY : LDA.w .digit_properties, Y : STA !BIGRAM, X : INX : INX
-	LDA.w #$0000 : STA !BIGRAM, X : INX : INX
+	LDY $0A : TYA : ASL : TAY : LDA.w .digit_properties, Y : JSR BigRAMStore
+	LDA.w #$0000 : JSR BigRAMStore
 	
 	LDA $0E : !ADD.w #$0008 : STA $0E ; move offset 8px right
 endmacro
@@ -75,6 +78,82 @@ DrawPrice:
 		LDY.b #$FF
 		LDX #$00 ; clear bigram pointer
 
+		REP #$20
+
+		; set up shop shuffle star
+		; i set it all up before then backtrack (dex #8) because i hate 16-bit 8-bit accumulator logic mixups
+		LDA $0E : !ADD.w #$10 : JSR BigRAMStore ; change this to a set distance from center
+		LDA.w #36 : JSR BigRAMStore
+		LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFAA : STA !BIGRAM-2, X : + 
+		LDA.w #$0391 : JSR BigRAMStore ; Yellow Star
+		LDA.w #$0000 : JSR BigRAMStore : STX $06
+
+		SEP #$20 ; set 8-bit accumulator
+		LDX $07 : LDA.l !SHOP_INVENTORY+3, X : CMP.b #$40 : !BGE +++ ; do not render on base items
+			; LDA.b $07 : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : BEQ ++ ; use a different icon if multiworld
+			; LDX $06 : LDA.b #$09 : STA !BIGRAM-3, X : LDA.b #$92 : STA !BIGRAM-4, X : BRA ++++ : ++
+			LDX $06 : BRA ++++
+		+++ : LDX $06 : DEX #8
+		++++
+		REP #$20
+
+		LDA $0D : AND.w #$80 : BNE ++ 
+			BRL .normal_price
+			++
+			; AT price location $0C-0D
+			; 0D item type (if highest bit is set 0x80, use 0x7F to determine type of price)
+			; 0C special price value 1-255
+			; Rupees = (normal price type)
+			; Hearts = 0
+			; Magic = 1
+			; Bomb = 2
+			; Arrows = 3
+			; HeartContainer = 4
+			; BombUpgrade = 5
+			; ArrowUpgrade = 6
+			; Keys = 7
+			; Potion = 8
+			; Item = 9
+			LDA $0E : !SUB.W #$04 : JSR BigRAMStore
+			LDA.w #56 : JSR BigRAMStore
+			LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFCA : STA !BIGRAM-2, X : + ; potion shop check
+			LDA $0D : AND #$000F : ASL : PHX : TAX : PHX : LSR : TAX;; Store OAM X, ICON array X (with A), LSR then get Adjust, then PLX 
+			LDA $0C : AND.w #$FF
+			LDY .adjust_value, X : BEQ + ; Adjust "value" to less arbitrary number, (a 255 value of magic reduced to 32 pips) but should probably just use graphcis
+				- : LSR : DEY : BNE -
+			+ : STA $0C : PLX
+			LDA.w .icon_graphics, X : PLX : JSR BigRAMStore
+			; Compare current Icon_Graphics (didn't feel like reloading price) to determine further icon adjusting
+			; We should be able to just write new graphics and patch them in instead, but I don't know how to do that with SNES
+			CMP.w #$0563 : BNE +
+				LDA.w #54
+				JSR LongPriceIcon
+				LDA.w #$0573 : JSR BigRAMStore
+			+
+			CMP.w #$0D63 : BNE +
+				LDA.w #54
+				JSR LongPriceIcon
+				LDA.w #$0D73 : JSR BigRAMStore
+			+
+			CMP.w #$056B : BNE +
+				LDA.w #53
+				JSR LongPriceIcon
+				LDA.w #$057B : JSR BigRAMStore
+			+
+			CMP.w #$0272 : BNE +
+				PHX 
+				LDA $0C : ASL : TAX : LDA .icon_graphics_bottle, X
+				PLX : STA !BIGRAM-2, X
+				LDA.w #$0000 : JSR BigRAMStore
+				LDA $0E : !ADD.w #$8 : STA $0E ; move offset 8px right
+				BRL .len0
+			+
+			.icon_done
+			LDA.w #$0000 : JSR BigRAMStore
+			LDA $0E : !ADD.w #$8 : STA $0E ; move offset 8px right
+			BRL .len2
+
+		.normal_price
 		LDA $0C : CMP.w #1000 : !BLT + : BRL .len4 : +
 				  CMP.w #100 : !BLT + : BRL .len3 : +
 				  CMP.w #10 : !BLT + : BRL .len2 : +
@@ -90,25 +169,13 @@ DrawPrice:
 				%DrawDigit(#10,#2)
 			
 			.len1
+			.len0	
 				%DrawDigit(#1,#0)
 
-			.len0
+		.okay				
 
-		; set up shop shuffle star
-		; i set it all up before then backtrack (dex #8) because i hate 16-bit 8-bit accumulator logic mixups
-		LDA $0E : STA !BIGRAM, X : INX : INX ; change this to a set distance from center
-		LDA.w #36 : STA !BIGRAM, X : INX : INX
-		LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFAA : STA !BIGRAM-2, X : + 
-		LDA.w #$0391 : STA !BIGRAM, X : INX : INX ; Yellow Star
-		LDA.w #$0000 : STA !BIGRAM, X : INX : INX : STX $06
+		SEP #$20
 
-		SEP #$20 ; set 8-bit accumulator
-		LDX $07 : LDA.l !SHOP_INVENTORY+3, X : CMP.b #$40 : !BGE +++ ; do not render on base items
-			; LDA.b $07 : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : BEQ ++ ; use a different icon if multiworld
-			; LDX $06 : LDA.b #$09 : STA !BIGRAM-3, X : LDA.b #$92 : STA !BIGRAM-4, X : BRA ++++ : ++
-			LDX $06 : BRA ++++
-		+++ : LDX $06 : DEX #8
-		++++
 		TXA : LSR #3 : STA $06 ; request 1-4 OAM slots
 		ASL #2
 			PHA
@@ -122,6 +189,36 @@ DrawPrice:
 		TXA : LSR #3
 	PLP : PLY : PLX
 RTS
+;--------------------------------------------------------------------------------
+.digit_properties
+dw $0230, $0231, $0202, $0203, $0212, $0213, $0222, $0223, $0232, $0233
+;--------------------------------------------------------------------------------
+.digit_offsets
+dw 4, 0, -4, -8
+;--------------------------------------------------------------------------------
+.icon_graphics
+dw $0329, $0960, $8570, $0563, $0d29, $8d70, $0d63, $056b, $0272, $0991
+;-------------------------------------------------------------------
+.icon_graphics_bottle
+dw $0372, $0972, $0572, $0b72, $0d72, $0d72
+;--------------------------------------------------------------------------------
+.adjust_value:
+db $03, $03, $00, $00, $03, $00, $00, $00, $00, $00, $00, $00
+;------
+ResourceOffset: ; where is our special price (8-bit) in memory relative to memaddress (i forgot the address)
+db $6D, $6E, $43, $77, $6C, $70, $71, $6F, $00
+
+LongPriceIcon:
+	; A == Y offset
+	; Y == secondary Y offset (potentially)
+	STA !BIGRAM-4, X ; TODO: use subtraction for potion shop offset
+	LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFC8 : STA !BIGRAM-4, X : + 
+	LDA.w #$0000 : JSR BigRAMStore
+	LDA $0E : !SUB.W #$04 : JSR BigRAMStore ; arrow Y POSITION
+	LDA.w #58 : JSR BigRAMStore
+	LDA $A0 : CMP.l #$109 : BNE + : LDA.w #$FFC8 : STA !BIGRAM-2, X : + 
+	RTS
+
 ;--------------------------------------------------------------------------------
 !TILE_UPLOAD_OFFSET_OVERRIDE = "$7F5042"
 !FREE_TILE_BUFFER = "#$1180"
@@ -141,12 +238,6 @@ RTS
 
 ;--------------------------------------------------------------------------------
 !NMI_AUX = "$7F5044"
-;--------------------------------------------------------------------------------
-.digit_properties
-dw $0230, $0231, $0202, $0203, $0212, $0213, $0222, $0223, $0232, $0233
-;--------------------------------------------------------------------------------
-.digit_offsets
-dw 4, 0, -4, -8
 ;--------------------------------------------------------------------------------
 SpritePrep_ShopKeeper:
 	PHX : PHY : PHP
@@ -178,7 +269,6 @@ SpritePrep_ShopKeeper:
 	
 	.success
 	SEP #$20 ; set 8-bit accumulator
-	
 	LDX.w #$0000
 	LDY.w #$0000
 	-
@@ -186,47 +276,9 @@ SpritePrep_ShopKeeper:
 		LDA.l ShopContentsTable+1, X : CMP.b #$FF : BNE ++ : BRL .stop : ++
 		
 		LDA.l ShopContentsTable, X : CMP !SHOP_ID : BEQ ++ : BRL .next : ++
-			LDA.l ShopContentsTable+1, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
-			LDA.l ShopContentsTable+2, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
-			LDA.l ShopContentsTable+3, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
-			LDA.l ShopContentsTable+8, X : PHX : PHA
-			LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
-			PLA : STA.l !SHOP_INVENTORY_PLAYER, X : LDA #0 : STA.l !SHOP_INVENTORY_DISGUISE, X : PLX
-			
-			PHY
-				PHX
-					LDA.b #$00 : XBA : TYA : LSR #2 : !ADD !SHOP_SRAM_INDEX : TAX
-					LDA !SHOP_PURCHASE_COUNTS, X : TYX : STA.l !SHOP_INVENTORY+3, X : TAY
-				PLX
-				
-				LDA.l ShopContentsTable+4, X : BEQ +
-				TYA : CMP.l ShopContentsTable+4, X : !BLT ++
-					PLY
-						LDA.l ShopContentsTable+5, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
-						LDA.l ShopContentsTable+6, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
-						LDA.l ShopContentsTable+7, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
-						LDA #$40 : PHX : TYX : STA.l !SHOP_INVENTORY+3, X : PLX
-						PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
-						LDA #0 : STA.l !SHOP_INVENTORY_PLAYER, X : PLX
-						BRA +++
-					+ : PLY : LDA #$40 : PHX : TYX : STA.l !SHOP_INVENTORY+3, X : PLX : BRA +++
-					++ : PLY : +++
-				
 
-			PHX : PHY
-				PHX : TYX : LDA.l !SHOP_INVENTORY, X : PLX
-				CMP #$5A : BEQ ++
-				CMP #$B0 : BNE + : ++
-					PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
-					JSL GetRandomInt : AND #$3F : STA !BEE_TRAP_DISGUISE
-					BNE ++ : LDA #$49 : ++ : CMP #$26 : BNE ++ : LDA #$6A : ++ ; if 0 (fighter's sword + shield), set to just sword, if filled container (bugged palette), switch to triforce piece
-					STA.l !SHOP_INVENTORY_DISGUISE, X : PLX
-				+ : TAY
-				REP #$20 ; set 16-bit accumulator
-				LDA 1,s : TAX : LDA.l .tile_offsets, X : TAX
-				JSR LoadTile
-			PLY : PLX
-			INY #4 ; width of shop inventory item
+		JSR SetupShopItem
+		INY #4 ; width of shop inventory item
 		
 		.next
 		INX #9 ; width of shop contents table
@@ -236,9 +288,9 @@ SpritePrep_ShopKeeper:
 	LDA #$01 : STA !NMI_AUX+2 : STA !NMI_AUX
 
 	.done
+
 	LDA.l !SHOP_TYPE : BIT.b #$20 : BEQ .notTakeAll ; Take-all
 	.takeAll
-
 		LDA.b #$00 : XBA : LDA !SHOP_SRAM_INDEX : TAX
 		LDA.l !SHOP_PURCHASE_COUNTS, X
 		BRA ++
@@ -267,6 +319,48 @@ SpritePrep_ShopKeeper:
 		JML.l ShopkeeperFinishInit
 	+
 RTL
+SetupShopItem:
+	LDA.l ShopContentsTable+1, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
+	LDA.l ShopContentsTable+2, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
+	LDA.l ShopContentsTable+3, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
+	LDA.l ShopContentsTable+8, X : PHX : PHA
+	LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
+	PLA : STA.l !SHOP_INVENTORY_PLAYER, X : LDA #0 : STA.l !SHOP_INVENTORY_DISGUISE, X : PLX
+	
+	PHY
+		PHX
+			LDA.b #$00 : XBA : TYA : LSR #2 : !ADD !SHOP_SRAM_INDEX : TAX
+			LDA !SHOP_PURCHASE_COUNTS, X : TYX : STA.l !SHOP_INVENTORY+3, X : TAY
+		PLX
+		
+		LDA.l ShopContentsTable+4, X : BEQ +
+		TYA : CMP.l ShopContentsTable+4, X : !BLT ++
+			PLY
+				LDA.l ShopContentsTable+5, X : PHX : TYX : STA.l !SHOP_INVENTORY, X : PLX
+				LDA.l ShopContentsTable+6, X : PHX : TYX : STA.l !SHOP_INVENTORY+1, X : PLX
+				LDA.l ShopContentsTable+7, X : PHX : TYX : STA.l !SHOP_INVENTORY+2, X : PLX
+				LDA #$40 : PHX : TYX : STA.l !SHOP_INVENTORY+3, X : PLX
+				PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
+				LDA #0 : STA.l !SHOP_INVENTORY_PLAYER, X : PLX
+				BRA +++
+			+ : PLY : LDA #$40 : PHX : TYX : STA.l !SHOP_INVENTORY+3, X : PLX : BRA +++
+		++ : PLY
+	+++
+
+	PHX : PHY
+		PHX : TYX : LDA.l !SHOP_INVENTORY, X : PLX
+		CMP #$5A : BEQ ++
+		CMP #$B0 : BNE + : ++
+			PHX : LDA #0 : XBA : TYA : LSR #2 : TAX ; This will convert the value back to the slot number (in 8-bit accumulator mode)
+			JSL GetRandomInt : AND #$3F : STA !BEE_TRAP_DISGUISE
+			BNE ++ : LDA #$49 : ++ : CMP #$26 : BNE ++ : LDA #$6A : ++ ; if 0 (fighter's sword + shield), set to just sword, if filled container (bugged palette), switch to triforce piece
+			STA.l !SHOP_INVENTORY_DISGUISE, X : PLX
+		+ : TAY
+		REP #$20 ; set 16-bit accumulator
+		LDA 1,s : TAX : LDA.l .tile_offsets, X : TAX
+		JSR LoadTile
+	PLY : PLX
+	RTS
 .tile_offsets
 dw $0000, $0000
 dw $0080, $0000
@@ -557,6 +651,14 @@ Shopkeeper_SetupHitboxes:
 	
 	PLP : PLY : PLX
 RTS
+
+GetFunnyBottleFunction:
+	; A = contents - 3 (red, green, blue, fairy, bee, goldbee)
+	PHX : PHA
+	LDA $7EF34F : BEQ .noBottle : TAX : DEX : PLA : !ADD #$3 : PHA
+	CMP $7EF35C, X : BNE .noBottle
+	.hasBottle : PLA : INX : TXA : PLX : RTS
+	.noBottle : PLA : PLX : LDA #$0 : RTS
 !LOCK_STATS = "$7EF443"
 !ITEM_TOTAL = "$7EF423"
 ;--------------------
@@ -573,11 +675,41 @@ Shopkeeper_BuyItem:
 		CMP.b #$B2 : BEQ .refill ; Good Bee Refill
 		BRA +
 			.refill
-			JSL.l Sprite_GetEmptyBottleIndex : BMI .full_bottles
 			LDA #$1 : STA !SHOP_KEEP_REFILL ; If this is on, don't toggle bit to remove from shop
+			JSL.l Sprite_GetEmptyBottleIndex : BPL + : BRL .full_bottles
 		+
 
-		LDA !SHOP_TYPE : AND.b #$80 : BNE .buy ; don't charge if this is a take-any
+		LDA !SHOP_TYPE : AND.b #$80 : BEQ + : BRL .buy : + ; don't charge if this is a take-any
+
+		.custom_price
+		LDA !SHOP_INVENTORY+2, X : AND.b #$80 : BEQ .price_is_rupees ; i honestly can't think of a better way to do this block because i haven't done asm in like 8 months
+		 	LDA !SHOP_INVENTORY+2, X : AND.b #$7F : CMP.b #$09 : BNE + ; 09 specifically is item
+				LDA !SHOP_INVENTORY+1, X : CMP.b $0303 : BNE .gotItem
+					BRL .cant_afford
+				.gotItem ; hand it over??  not logic friendly
+				BRL .buy_real
+			+
+		 	CMP.b #$08 : BNE + ; 08 specifically is potion
+				LDA !SHOP_INVENTORY+1, X : JSR GetFunnyBottleFunction : CMP #$0 : BNE .gotBottle
+					BRL .cant_afford
+				.gotBottle
+				PHX : LDA $7EF34F : TAX : DEX : LDA #$02 : STA $7EF35C, X : PLX : BRL .buy_real
+			+
+			LDA !SHOP_INVENTORY+2, X : AND.b #$07 ; if bit 80, it's custom, if numbers 0-7, custom resource
+				; store shop index, get resource offset (X), load val, pop shop index, cmp val to shop_price...
+				PHX : TAX : LDA ResourceOffset, X : TAX : TAY : LDA $7EF300, X ; fumble around with our resource value and price, sub value then put back into RAM
+				PLX : CMP !SHOP_INVENTORY+1,X : BMI + ; if resource is less than value, skip
+				; subtract and store, store (x), store val back to address
+				; if X is heart containers, set ordinary hearts
+				!SUB !SHOP_INVENTORY+1,X : PHX : TYX : STA $7EF300, X 
+				CPX #$6C : BNE .notHeartContainers
+					CMP $7EF36D : !BGE .notHeartContainers : STA $7EF36D
+				.notHeartContainers
+				PLX : BRL .buy_real 
+			+
+		 	BRL .cant_afford
+		.price_is_rupees
+
 		REP #$20 : LDA $7EF360 : CMP.l !SHOP_INVENTORY+1, X : SEP #$20 : !BGE .buy
 		
 		.cant_afford
@@ -602,6 +734,7 @@ Shopkeeper_BuyItem:
 				LDA #0 : XBA : TXA : LSR #2 : TAX : LDA.l !SHOP_INVENTORY_PLAYER, X : STA !MULTIWORLD_ITEM_PLAYER_ID
 				LDA.l !SHOP_TYPE : BIT.b #$80 : BNE +		;Is the shop location a take-any cave
 				TXA : !ADD !SHOP_SRAM_INDEX : TAX : BRA ++				;If so, explicitly load first SRAM Slot.
+
 				+ LDA.l !SHOP_SRAM_INDEX : TAX
 				
 				++ LDA.l !SHOP_PURCHASE_COUNTS, X : BNE +++	;Is this the first time buying this slot?
@@ -611,7 +744,7 @@ Shopkeeper_BuyItem:
 			LDA.l !SHOP_INVENTORY, X : TAY : JSL.l Link_ReceiveItem
 			LDA.l !SHOP_INVENTORY+3, X : INC : STA.l !SHOP_INVENTORY+3, X
 			LDA.b #0 : STA.l !SHOP_ENABLE_COUNT
-			
+
 			TXA : LSR #2 : TAX
 			LDA !SHOP_TYPE : BIT.b #$80 : BNE +
 				LDA !SHOP_KEEP_REFILL : BNE +++
@@ -657,11 +790,15 @@ Shopkeeper_BuyItem:
 						LDA.l !SHOP_SRAM_INDEX : TAX : LDA.l !SHOP_STATE : STA.l !SHOP_PURCHASE_COUNTS, X
 					PLX
 			++
-			; JSL SpritePrep_ShopKeeper ;; reloads entire shop again
+			; JSL.l ReloadShopkeep
 	.done
 	LDA #$0 : STA !SHOP_KEEP_REFILL
 	PLY : PLX
 RTS
+ReloadShopkeep:
+	PHX : PHY : PHP
+	REP #$30 ; set 16-bit accumulator & index registers
+	JMP SpritePrep_ShopKeeper_success
 Shopkeeper_ItemMasks:
 db #$01, #$02, #$04, #$08
 ;--------------------
