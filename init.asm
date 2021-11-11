@@ -40,6 +40,7 @@ Init_Primary:
 			INX
 			CPX #$15 : !BLT -
 	.done
+	LDA DeathLink : STA $702000, X ; move death link byte to just after the sram copy of rom header
 	
 	LDA.b #$01 : STA $420D ; enable fastrom access on upper banks
 	
