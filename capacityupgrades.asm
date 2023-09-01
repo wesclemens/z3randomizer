@@ -5,16 +5,13 @@
 !BOMB_CURRENT = "$7EF343"
 ;--------------------------------------------------------------------------------
 IncrementBombs:
-    LDA !BOMB_UPGRADES ; get bomb upgrades
-	!ADD.l StartingMaxBombs : DEC
-
-    CMP !BOMB_CURRENT
-	
-	!BLT +
-    	LDA !BOMB_CURRENT
-		CMP.b #99 : !BGE +
-		INC : STA !BOMB_CURRENT
-	+
+        LDA.l !BOMB_UPGRADES : BEQ + ; Skip if we can't have bombs
+                DEC
+                CMP.l !BOMB_CURRENT : !BLT +
+                        LDA.l !BOMB_CURRENT
+                        CMP.b #99 : !BGE +
+                                INC : STA.l !BOMB_CURRENT
+        +
 RTL
 ;--------------------------------------------------------------------------------
 !ARROW_UPGRADES = "$7EF371"
@@ -35,8 +32,7 @@ RTL
 ;--------------------------------------------------------------------------------
 CompareBombsToMax:
     LDA !BOMB_UPGRADES ; get bomb upgrades
-	!ADD.l StartingMaxBombs
-
+	;!ADD.l StartingMaxBombs : DEC
     CMP !BOMB_CURRENT
 RTL
 ;--------------------------------------------------------------------------------
